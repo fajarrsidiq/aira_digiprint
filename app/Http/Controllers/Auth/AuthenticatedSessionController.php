@@ -3,45 +3,50 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Auth\LoginRequest;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
 {
-    /**
-     * Display the login view.
-     */
-    public function create(): View
+    public function create()
     {
         return view('auth.login');
     }
 
-    /**
-     * Handle an incoming authentication request.
-     */
-    public function store(LoginRequest $request): RedirectResponse
+    public function store(Request $request)
     {
-        $request->authenticate();
+        $request->validate([
+            'username' => 'required|string',
+            'password' => 'required|string',
+            'role' => 'required|in:petugas,pelanggan',
+        ]);
 
-        $request->session()->regenerate();
+        if ($request->role === 'petugas') {
+            Auth::guard('pelanggan')->logout();
+        } else {
+            Auth::guard('petugas')->logout();
+        }
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        $guard = $request->role === 'petugas' ? 'petugas' : 'pelanggan';
+        $credentials = ['username' => $request->username, 'password' => $request->password];
+
+        if (Auth::guard($guard)->attempt($credentials, $request->boolean('remember'))) {
+            $request->session()->regenerate();
+            if ($guard === 'petugas') {
+                return redirect()->route('dashboard.petugas');
+            }
+            return redirect()->route('dashboard.pelanggan');
+        }
+
+        return back()->withErrors(['username' => 'Username atau password salah.'])->onlyInput('username', 'role');
     }
 
-    /**
-     * Destroy an authenticated session.
-     */
-    public function destroy(Request $request): RedirectResponse
+    public function destroy(Request $request)
     {
-        Auth::guard('web')->logout();
-
+        if (Auth::guard('petugas')->check()) Auth::guard('petugas')->logout();
+        if (Auth::guard('pelanggan')->check()) Auth::guard('pelanggan')->logout();
         $request->session()->invalidate();
-
         $request->session()->regenerateToken();
-
         return redirect('/');
     }
 }

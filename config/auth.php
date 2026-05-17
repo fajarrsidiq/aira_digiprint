@@ -39,8 +39,16 @@ return [
 
     'guards' => [
         'web' => [
+        'driver' => 'session',
+        'provider' => 'users',
+        ],
+        'petugas' => [
             'driver' => 'session',
-            'provider' => 'users',
+            'provider' => 'petugas',
+        ],
+        'pelanggan' => [
+            'driver' => 'session',
+            'provider' => 'pelanggan',
         ],
     ],
 
@@ -65,6 +73,14 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', User::class),
+        ],
+        'petugas' => [
+        'driver' => 'eloquent',
+        'model' => App\Models\Petugas::class,
+        ],
+        'pelanggan' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Pelanggan::class,
         ],
 
         // 'users' => [

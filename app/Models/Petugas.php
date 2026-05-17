@@ -2,12 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Notifications\Notifiable;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class Petugas extends Model
+class Petugas extends Authenticatable
 {
-    use Notifiable;
     protected $table = 'petugas';
     protected $primaryKey = 'id_petugas';
     protected $fillable = ['username', 'email', 'password', 'nama_lengkap', 'level'];
