@@ -3,27 +3,42 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 
 class PasswordController extends Controller
 {
-    /**
-     * Update the user's password.
-     */
-    public function update(Request $request): RedirectResponse
+    public function update(Request $request)
     {
-        $validated = $request->validateWithBag('updatePassword', [
-            'current_password' => ['required', 'current_password'],
-            'password' => ['required', Password::defaults(), 'confirmed'],
+        // Cek guard aktif
+        if (Auth::guard('petugas')->check()) {
+            $user = Auth::guard('petugas')->user();
+            $guard = 'petugas';
+        } elseif (Auth::guard('pelanggan')->check()) {
+            $user = Auth::guard('pelanggan')->user();
+            $guard = 'pelanggan';
+        } else {
+            return redirect()->route('login');
+        }
+
+        $request->validate([
+            'current_password' => ['required', function ($attribute, $value, $fail) use ($user) {
+                if (!Hash::check($value, $user->password)) {
+                    $fail('Password saat ini salah.');
+                }
+            }],
+            'password' => ['required', 'confirmed', Password::defaults()],
         ]);
 
-        $request->user()->update([
-            'password' => Hash::make($validated['password']),
-        ]);
+        // Update password
+        $user->update(['password' => Hash::make($request->password)]);
 
-        return back()->with('status', 'password-updated');
+        // Login ulang dengan guard yang sama
+        Auth::guard($guard)->login($user);
+
+        // Redirect ke halaman profil
+        return redirect()->route('profile.edit')->with('status', 'password-updated');
     }
 }

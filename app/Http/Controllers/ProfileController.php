@@ -2,59 +2,49 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ProfileUpdateRequest;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
-use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
-    /**
-     * Display the user's profile form.
-     */
-    public function edit(Request $request): View
+    public function edit()
     {
-        return view('profile.edit', [
-            'user' => $request->user(),
-        ]);
+        if (Auth::guard('petugas')->check()) {
+            $user = Auth::guard('petugas')->user();
+        } elseif (Auth::guard('pelanggan')->check()) {
+            $user = Auth::guard('pelanggan')->user();
+        } else {
+            return redirect()->route('login');
+        }
+        return view('profile.edit', compact('user'));
     }
 
-    /**
-     * Update the user's profile information.
-     */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(Request $request)
     {
-        $request->user()->fill($request->validated());
-
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        if (Auth::guard('petugas')->check()) {
+            $user = Auth::guard('petugas')->user();
+            $validated = $request->validate([
+                'nama_lengkap' => 'required|string|max:100',
+                'email' => 'required|email|unique:petugas,email,' . $user->id_petugas . ',id_petugas',
+            ]);
+            $user->update($validated);
+        } elseif (Auth::guard('pelanggan')->check()) {
+            $user = Auth::guard('pelanggan')->user();
+            $validated = $request->validate([
+                'username' => 'required|string|max:255|unique:pelanggan,username,' . $user->id_pelanggan . ',id_pelanggan',
+                'alamat' => 'nullable|string',
+                'no_telpon' => 'nullable|string|max:15',
+            ]);
+            $user->update($validated);
+        } else {
+            return redirect()->route('login');
         }
-
-        $request->user()->save();
-
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 
-    /**
-     * Delete the user's account.
-     */
-    public function destroy(Request $request): RedirectResponse
+    public function destroy(Request $request)
     {
-        $request->validateWithBag('userDeletion', [
-            'password' => ['required', 'current_password'],
-        ]);
-
-        $user = $request->user();
-
-        Auth::logout();
-
-        $user->delete();
-
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return Redirect::to('/');
+        return back()->with('error', 'Fitur hapus akun dinonaktifkan.');
     }
 }

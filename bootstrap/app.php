@@ -12,6 +12,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
+            'any.guard' => \App\Http\Middleware\CheckAnyGuard::class,
             'level' => \App\Http\Middleware\CheckLevel::class,
         ]);
     })

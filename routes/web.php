@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
@@ -13,15 +14,16 @@ Route::get('/', function () {
 Route::middleware(['auth:petugas'])->get('/dashboard/petugas', [DashboardController::class, 'petugas'])->name('dashboard.petugas');
 
 // Dashboard pelanggan
-Route::middleware(['auth:pelanggan'])->get('/dashboard/pelanggan', function () {
+Route::middleware(['auth:pelanggan'])->get('/dashboard/pelanggan', function (){
     return view('pelanggan.dashboard', ['user' => auth()->guard('pelanggan')->user()]);
 })->name('dashboard.pelanggan');
 
 // Profile Pengguna
-Route::middleware('auth')->group(function () {
+Route::middleware(['any.guard'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::post('/password', [PasswordController::class, 'update'])->name('password.update');
 });
 
 // CRUD satuan (Owner & Administrasi)
