@@ -5,6 +5,7 @@ use App\Http\Controllers\BahanController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\SatuanController;
 
 Route::get('/', function () {
@@ -46,5 +47,16 @@ Route::middleware(['auth:petugas', 'level:Owner,Administrasi'])->group(function 
     Route::put('/bahan/{bahan}', [BahanController::class, 'update'])->name('bahan.update');
     Route::delete('/bahan/{bahan}', [BahanController::class, 'destroy'])->name('bahan.destroy');
 });
+
+// CRUD Bahan (Owner & Administrasi)
+Route::middleware(['auth:petugas', 'level:Owner,Administrasi'])->group(function () {
+    Route::get('/produk', [ProdukController::class, 'index'])->name('produk.index');
+    Route::get('/produk/create', [ProdukController::class, 'create'])->name('produk.create');
+    Route::post('/produk', [ProdukController::class, 'store'])->name('produk.store');
+    Route::get('/produk/{produk}/edit', [ProdukController::class, 'edit'])->name('produk.edit');
+    Route::put('/produk/{produk}', [ProdukController::class, 'update'])->name('produk.update');
+    Route::delete('/produk/{produk}', [ProdukController::class, 'destroy'])->name('produk.destroy');
+});
+
 
 require __DIR__.'/auth.php';
