@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\PasswordController;
+use App\Http\Controllers\BahanController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
@@ -34,6 +35,16 @@ Route::middleware(['auth:petugas', 'level:Owner,Administrasi'])->group(function 
     Route::get('/satuan/{satuan}/edit', [SatuanController::class, 'edit'])->name('satuan.edit');
     Route::put('/satuan/{satuan}', [SatuanController::class, 'update'])->name('satuan.update');
     Route::delete('/satuan/{satuan}', [SatuanController::class, 'destroy'])->name('satuan.destroy');
+});
+
+// CRUD Bahan (Owner & Administrasi)
+Route::middleware(['auth:petugas', 'level:Owner,Administrasi'])->group(function () {
+    Route::get('/bahan', [BahanController::class, 'index'])->name('bahan.index');
+    Route::get('/bahan/create', [BahanController::class, 'create'])->name('bahan.create');
+    Route::post('/bahan', [BahanController::class, 'store'])->name('bahan.store');
+    Route::get('/bahan/{bahan}/edit', [BahanController::class, 'edit'])->name('bahan.edit');
+    Route::put('/bahan/{bahan}', [BahanController::class, 'update'])->name('bahan.update');
+    Route::delete('/bahan/{bahan}', [BahanController::class, 'destroy'])->name('bahan.destroy');
 });
 
 require __DIR__.'/auth.php';
