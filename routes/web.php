@@ -6,6 +6,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PelangganController;
+use App\Http\Controllers\PetugasController;
 use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\SatuanController;
 
@@ -67,6 +68,16 @@ Route::middleware(['auth:petugas', 'level:Owner,Administrasi'])->group(function 
     Route::get('/pelanggan/{pelanggan}/edit', [PelangganController::class, 'edit'])->name('pelanggan.edit');
     Route::put('/pelanggan/{pelanggan}', [PelangganController::class, 'update'])->name('pelanggan.update');
     Route::delete('/pelanggan/{pelanggan}', [PelangganController::class, 'destroy'])->name('pelanggan.destroy');
+});
+
+// CRUD Petugas (Owner)
+Route::middleware(['auth:petugas', 'level:Owner,Administrasi'])->group(function () {
+    Route::get('/petugas', [PetugasController::class, 'index'])->name('petugas.index');
+    Route::get('/petugas/create', [PetugasController::class, 'create'])->name('petugas.create');
+    Route::post('/petugas', [PetugasController::class, 'store'])->name('petugas.store');
+    Route::get('/petugas/{petugas}/edit', [PetugasController::class, 'edit'])->name('petugas.edit');
+    Route::put('/petugas/{petugas}', [PetugasController::class, 'update'])->name('petugas.update');
+    Route::delete('/petugas/{petugas}', [PetugasController::class, 'destroy'])->name('petugas.destroy');
 });
 
 
