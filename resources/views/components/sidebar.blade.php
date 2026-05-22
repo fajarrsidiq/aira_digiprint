@@ -25,7 +25,11 @@
                 </a>
 
                  <a href="{{ route('produk.index') }}" class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all {{ request()->routeIs('bahan.*') ? 'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 shadow-sm border-l-4 border-blue-500' : 'text-gray-700 hover:bg-gray-100' }}">
-                    <i class="fas fa-cubes w-5"></i> Produk
+                    <i class="fas fa-boxes w-5"></i> Produk
+                </a>
+
+                <a href="{{ route('pelanggan.index') }}" class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all {{ request()->routeIs('pelanggan.*') ? 'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 shadow-sm border-l-4 border-blue-500' : 'text-gray-700 hover:bg-gray-100' }}">
+                    <i class="fas fa-users w-5"></i> Pelanggan
                 </a>
 
                 <!-- Tambahkan menu lain (bahan, produk, pelanggan) di sini dengan pola sama -->

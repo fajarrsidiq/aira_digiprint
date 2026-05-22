@@ -5,6 +5,7 @@ use App\Http\Controllers\BahanController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PelangganController;
 use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\SatuanController;
 
@@ -56,6 +57,16 @@ Route::middleware(['auth:petugas', 'level:Owner,Administrasi'])->group(function 
     Route::get('/produk/{produk}/edit', [ProdukController::class, 'edit'])->name('produk.edit');
     Route::put('/produk/{produk}', [ProdukController::class, 'update'])->name('produk.update');
     Route::delete('/produk/{produk}', [ProdukController::class, 'destroy'])->name('produk.destroy');
+});
+
+// CRUD Pelanggan (Owner & Administrasi)
+Route::middleware(['auth:petugas', 'level:Owner,Administrasi'])->group(function () {
+    Route::get('/pelanggan', [PelangganController::class, 'index'])->name('pelanggan.index');
+    Route::get('/pelanggan/create', [PelangganController::class, 'create'])->name('pelanggan.create');
+    Route::post('/pelanggan', [PelangganController::class, 'store'])->name('pelanggan.store');
+    Route::get('/pelanggan/{pelanggan}/edit', [PelangganController::class, 'edit'])->name('pelanggan.edit');
+    Route::put('/pelanggan/{pelanggan}', [PelangganController::class, 'update'])->name('pelanggan.update');
+    Route::delete('/pelanggan/{pelanggan}', [PelangganController::class, 'destroy'])->name('pelanggan.destroy');
 });
 
 
