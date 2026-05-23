@@ -24,7 +24,7 @@
                     <i class="fas fa-cubes w-5"></i> Bahan
                 </a>
 
-                 <a href="{{ route('produk.index') }}" class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all {{ request()->routeIs('bahan.*') ? 'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 shadow-sm border-l-4 border-blue-500' : 'text-gray-700 hover:bg-gray-100' }}">
+                <a href="{{ route('produk.index') }}" class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all {{ request()->routeIs('bahan.*') ? 'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 shadow-sm border-l-4 border-blue-500' : 'text-gray-700 hover:bg-gray-100' }}">
                     <i class="fas fa-boxes w-5"></i> Produk
                 </a>
 
@@ -34,8 +34,12 @@
             @endif
 
             @if($userLevel === 'Owner')
-                 <a href="{{ route('petugas.index') }}" class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all">
+                <a href="{{ route('petugas.index') }}" class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all">
                     <i class="fas fa-user-tie w-5"></i> Petugas
+                </a>
+
+                <a href="{{ route('jenispembayaran.index') }}" class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all">
+                    <i class="fas fa-credit-card w-5"></i> Jenis Pembayaran
                 </a>
             @endif
 

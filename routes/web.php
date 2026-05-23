@@ -5,6 +5,7 @@ use App\Http\Controllers\BahanController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\JenisPembayaranController;
 use App\Http\Controllers\PelangganController;
 use App\Http\Controllers\PetugasController;
 use App\Http\Controllers\ProdukController;
@@ -80,5 +81,14 @@ Route::middleware(['auth:petugas', 'level:Owner,Administrasi'])->group(function 
     Route::delete('/petugas/{petugas}', [PetugasController::class, 'destroy'])->name('petugas.destroy');
 });
 
+// CRUD Jenis Pembayaran (Owner)
+Route::middleware(['auth:petugas', 'level:Owner,Administrasi'])->group(function () {
+    Route::get('/jenispembayaran', [JenisPembayaranController::class, 'index'])->name('jenispembayaran.index');
+    Route::get('/jenispembayaran/create', [JenisPembayaranController::class, 'create'])->name('jenispembayaran.create');
+    Route::post('/jenispembayaran', [JenisPembayaranController::class, 'store'])->name('jenispembayaran.store');
+    Route::get('/jenispembayaran/{jenispembayaran}/edit', [JenisPembayaranController::class, 'edit'])->name('jenispembayaran.edit');
+    Route::put('/jenispembayaran/{jenispembayaran}', [JenisPembayaranController::class, 'update'])->name('jenispembayaran.update');
+    Route::delete('/jenispembayaran/{jenispembayaran}', [JenisPembayaranController::class, 'destroy'])->name('jenispembayaran.destroy');
+});
 
 require __DIR__.'/auth.php';
