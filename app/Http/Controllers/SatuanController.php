@@ -52,7 +52,7 @@ class SatuanController extends Controller
     {
         if ($satuan->produks()->exists()) { 
             return redirect()->route('satuan.index')
-                ->with('error', 'Satuan "' . $satuan->nama_satuan . '" tidak bisa dihapus karena masih digunakan oleh produk!');
+            ->with('error', 'Satuan "' . $satuan->nama_satuan . '" tidak bisa dihapus karena masih digunakan oleh produk!');
         }
         
         $satuan->delete();

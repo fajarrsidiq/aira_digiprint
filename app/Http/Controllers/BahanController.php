@@ -7,9 +7,16 @@ use Illuminate\Http\Request;
 
 class BahanController extends Controller
 {
-    public function index()
+   public function index(Request $request)
     {
-        $bahans = Bahan::latest()->paginate(10);
+        $search = $request->get('search');
+
+        $bahans = Bahan::when($search, function ($query, $search) {
+                return $query->where('nama_bahan', 'like', '%' . $search . '%');
+            })
+            ->latest()
+            ->paginate(10);
+
         return view('bahan.index', compact('bahans'));
     }
 
@@ -43,6 +50,10 @@ class BahanController extends Controller
 
     public function destroy(Bahan $bahan)
     {
+        if ($bahan->produks()->exists()) {
+            return redirect()->route('bahan.index')
+            ->with('error', 'Bahan "' . $bahan->nama_bahan . '" tidak bisa dihapus karena masih digunakan oleh produk!');
+        }
         $bahan->delete();
         return redirect()->route('bahan.index')->with('success', 'Bahan berhasil dihapus.');
     }
