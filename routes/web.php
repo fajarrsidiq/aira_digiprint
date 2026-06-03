@@ -10,6 +10,7 @@ use App\Http\Controllers\PelangganController;
 use App\Http\Controllers\PetugasController;
 use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\SatuanController;
+use App\Http\Controllers\TransaksiController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -89,6 +90,24 @@ Route::middleware(['auth:petugas', 'level:Owner,Administrasi'])->group(function 
     Route::get('/jenispembayaran/{jenispembayaran}/edit', [JenisPembayaranController::class, 'edit'])->name('jenispembayaran.edit');
     Route::put('/jenispembayaran/{jenispembayaran}', [JenisPembayaranController::class, 'update'])->name('jenispembayaran.update');
     Route::delete('/jenispembayaran/{jenispembayaran}', [JenisPembayaranController::class, 'destroy'])->name('jenispembayaran.destroy');
+});
+
+// Transaksi (Owner & Administrasi)
+Route::middleware(['auth:petugas', 'level:Owner,Administrasi'])->prefix('transaksi')->name('transaksi.')->group(function () {
+    Route::get('/', [TransaksiController::class, 'index'])->name('index');
+    Route::get('/create', [TransaksiController::class, 'create'])->name('create');
+    Route::post('/', [TransaksiController::class, 'store'])->name('store');
+    Route::get('/{id}', [TransaksiController::class, 'show'])->name('show');
+    Route::delete('/{id}', [TransaksiController::class, 'destroy'])->name('destroy');
+    Route::get('/invoice/{id}', [TransaksiController::class, 'invoice'])->name('invoice');
+
+    // Alur penanganan berkas dan pencetakan invoice
+    Route::get('/{id}/invoice', [TransaksiController::class, 'invoice'])->name('invoice');
+    Route::get('/{id}/download-desain', [TransaksiController::class, 'downloadDesain'])->name('download-desain');
+    
+    // Alur baru halaman pelunasan (Sudah otomatis bernama transaksi.pelunasan & transaksi.proses-pelunasan)
+    Route::get('/{id}/pelunasan', [TransaksiController::class, 'halamanPelunasan'])->name('pelunasan');
+    Route::put('/{id}/proses-pelunasan', [TransaksiController::class, 'prosesPelunasan'])->name('proses-pelunasan');
 });
 
 require __DIR__.'/auth.php';

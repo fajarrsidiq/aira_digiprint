@@ -24,7 +24,7 @@
                     <i class="fas fa-cubes w-5"></i> Bahan
                 </a>
 
-                <a href="{{ route('produk.index') }}" class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all {{ request()->routeIs('bahan.*') ? 'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 shadow-sm border-l-4 border-blue-500' : 'text-gray-700 hover:bg-gray-100' }}">
+                <a href="{{ route('produk.index') }}" class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all {{ request()->routeIs('produk.*') ? 'bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 shadow-sm border-l-4 border-blue-500' : 'text-gray-700 hover:bg-gray-100' }}">
                     <i class="fas fa-boxes w-5"></i> Produk
                 </a>
 
@@ -47,8 +47,8 @@
                 <div class="pt-4 mt-4 border-t border-gray-200">
                     <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-4 mb-2">Transaksi</p>
                 </div>
-                <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all">
-                    <i class="fas fa-shopping-cart w-5"></i> Riwayat Transaksi
+                <a href="{{ route('transaksi.index') }}" class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all">
+                    <i class="fas fa-shopping-cart w-5"></i>Transaksi
                 </a>
             @endif
 

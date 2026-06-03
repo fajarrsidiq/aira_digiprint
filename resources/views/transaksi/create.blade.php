@@ -1,0 +1,514 @@
+@extends('layouts.app')
+@section('title', 'Input Pesanan')
+@section('content')
+<div class="w-full p-2 md:p-4 min-h-screen">
+    <form method="POST" action="{{ route('transaksi.store') }}" enctype="multipart/form-data" id="transaksiForm">
+        @csrf
+        <input type="hidden" name="cart" id="cartInput">
+        <input type="hidden" name="status_pesanan" id="statusPesananInput" value="Menunggu Konfirmasi">
+
+        <div class="flex flex-col gap-6 w-full">
+            
+            <div class="bg-white border border-gray-300 rounded-lg shadow-sm overflow-hidden w-full">
+                <div class="bg-gray-50 px-5 py-3 border-b border-gray-300">
+                    <strong class="text-sm font-semibold text-gray-700 tracking-wider">INPUT PESANAN</strong>
+                </div>
+                <div class="p-5 flex flex-col gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4">
+                        <div class="flex flex-col gap-4">
+                            <div class="flex flex-col gap-1.5">
+                                <label class="text-xs font-semibold text-gray-600">Invoice</label>
+                                <input type="text" name="no_invoice" class="w-full text-sm px-3 py-2 bg-gray-200 border border-gray-300 rounded text-gray-700 font-medium focus:outline-none" id="invoiceNumber" readonly value="{{ $invoiceOtomatis ?? 'INV-'.date('dmy') }}">
+                            </div>
+                            <div class="flex flex-col gap-1.5">
+                                <label class="text-xs font-semibold text-gray-600">Produk</label>
+                                <select id="produkSelect" class="w-full text-sm px-3 py-2 bg-white border border-gray-300 rounded text-gray-700 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                                    <option value="">-- Pilih Produk --</option>
+                                    @foreach($produks as $p)
+                                    <option value="{{ $p->id_produk }}" data-harga="{{ $p->harga }}" data-nama="{{ $p->nama_produk }}" data-ukuran="{{ $p->ukuran_default }}">
+                                        {{ $p->nama_produk }}
+                                    </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="flex flex-col gap-1.5">
+                                <label class="text-xs font-semibold text-gray-600">Ukuran</label>
+                                <div id="ukuranFixed" style="display: none;">
+                                    <input type="text" id="ukuranFixedValue" class="w-full text-sm px-3 py-2 bg-gray-200 border border-gray-300 rounded text-gray-700 focus:outline-none" readonly>
+                                </div>
+                                <div id="ukuranCustom" style="display: none;">
+                                    <div class="flex items-center gap-2">
+                                        <div class="flex-1 flex items-center bg-white border border-gray-300 rounded overflow-hidden">
+                                            <input type="number" id="panjangInput" class="w-full text-sm px-3 py-2 focus:outline-none" placeholder="Panjang" step="0.01">
+                                            <span class="text-xs text-gray-400 bg-gray-50 px-2 border-l border-gray-200 py-2">M</span>
+                                        </div>
+                                        <span class="text-sm font-semibold text-gray-400">x</span>
+                                        <div class="flex-1 flex items-center bg-white border border-gray-300 rounded overflow-hidden">
+                                            <input type="number" id="lebarInput" class="w-full text-sm px-3 py-2 focus:outline-none" placeholder="Lebar" step="0.01">
+                                            <span class="text-xs text-gray-400 bg-gray-50 px-2 border-l border-gray-200 py-2">M</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="ukuranEmpty">
+                                    <input type="text" class="w-full text-sm px-3 py-2 bg-gray-100 border border-gray-300 rounded text-gray-400 italic focus:outline-none" placeholder="Pilih produk terlebih dahulu" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-4">
+                            <div class="flex flex-col gap-1.5">
+                                <label class="text-xs font-semibold text-gray-600">Harga</label>
+                                <input type="text" id="hargaDisplay" class="w-full text-sm px-3 py-2 bg-gray-200 border border-gray-300 rounded text-gray-700 font-bold focus:outline-none" readonly value="Rp 0">
+                            </div>
+                            <div class="flex flex-col gap-1.5">
+                                <label class="text-xs font-semibold text-gray-600">Qty</label>
+                                <input type="number" id="qtyInput" class="w-full text-sm px-3 py-2 bg-white border border-gray-300 rounded text-gray-700 focus:outline-none focus:border-blue-500" value="1" min="1">
+                            </div>
+                            <div class="flex flex-col gap-1.5">
+                                <label class="text-xs font-semibold text-gray-600">Upload Desain</label>
+                                <input type="file" id="desainInput" class="w-full text-sm file:mr-4 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border border-gray-300 rounded bg-white text-gray-500 focus:outline-none" accept="image/*,application/pdf">
+                                <small class="text-xs text-gray-400 font-medium mt-1 block truncate" id="namaFileDesain"></small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-end gap-3 pt-3 border-t border-gray-100">
+                        <button type="button" id="batalItemBtn" class="bg-gray-500 hover:bg-gray-600 text-white font-semibold text-xs px-5 py-2.5 rounded shadow-sm uppercase tracking-wider">Batal</button>
+                        <button type="button" id="tambahItemBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs px-5 py-2.5 rounded shadow-sm uppercase tracking-wider">Simpan</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white border border-gray-300 rounded-lg shadow-sm overflow-hidden w-full">
+                <div class="bg-gray-50 px-5 py-3 border-b border-gray-300">
+                    <strong class="text-sm font-semibold text-gray-700 tracking-wider">DETAIL TRANSAKSI</strong>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-gray-100 text-gray-700 font-semibold border-b border-gray-300">
+                                <th class="p-3 text-center w-[5%]">No</th>
+                                <th class="p-3 w-[30%]">Nama Produk</th>
+                                <th class="p-3 text-center w-[12%]">Ukuran</th>
+                                <th class="p-3 text-center w-[13%]">Desain</th>
+                                <th class="p-3 text-right w-[15%]">Harga</th>
+                                <th class="p-3 text-center w-[10%]">Qty</th>
+                                <th class="p-3 text-right w-[15%]">Total</th>
+                                <th class="p-3 text-center w-[10%]">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cartTableBody" class="text-gray-600 divide-y divide-gray-200">
+                            <tr>
+                                <td colspan="8" class="text-center py-10 text-gray-400 italic">Belum ada item</td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr class="bg-gray-50 font-bold text-gray-700 border-t border-gray-300">
+                                <td colspan="6" class="p-3 text-right">Subtotal</td>
+                                <td colspan="2" class="p-3 text-left pl-6 text-blue-600 font-black text-sm" id="subtotalDisplay">Rp 0</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <div class="bg-white border border-gray-300 rounded-lg shadow-sm overflow-hidden w-full">
+                <div class="bg-gray-50 px-5 py-3 border-b border-gray-300">
+                    <strong class="text-sm font-semibold text-gray-700 tracking-wider">PEMBAYARAN TRANSAKSI</strong>
+                </div>
+                <div class="p-5 flex flex-col gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4">
+                        <div class="flex flex-col gap-4">
+                            <div class="grid grid-cols-3 items-center gap-2">
+                                <label class="text-xs font-semibold text-gray-600">Pelanggan</label>
+                                <div class="col-span-2">
+                                    <select name="id_pelanggan" id="pelangganSelect" class="w-full text-sm px-3 py-1.5 bg-white border border-gray-300 rounded text-gray-700 focus:outline-none focus:border-blue-500" required>
+                                        <option value="">Pilih Pelanggan</option>
+                                        @foreach($pelanggans as $pl)
+                                        <option value="{{ $pl->id_pelanggan }}" data-telpon="{{ $pl->no_telpon ?? '-' }}" data-alamat="{{ $pl->alamat ?? '-' }}">
+                                            {{ $pl->username }}
+                                        </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-3 items-center gap-2">
+                                <label class="text-xs font-semibold text-gray-600">Telpon</label>
+                                <div class="col-span-2">
+                                    <input type="text" id="noTelpon" class="w-full text-sm px-3 py-1.5 bg-gray-200 border border-gray-300 rounded text-gray-700 focus:outline-none" readonly placeholder="-">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-3 items-center gap-2">
+                                <label class="text-xs font-semibold text-gray-600">Alamat</label>
+                                <div class="col-span-2">
+                                    <input type="text" id="alamatPelanggan" class="w-full text-sm px-3 py-1.5 bg-gray-200 border border-gray-300 rounded text-gray-700 focus:outline-none" readonly placeholder="-">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-3 items-center gap-2">
+                                <label class="text-xs font-semibold text-gray-600">Diskon</label>
+                                <div class="col-span-2">
+                                    <input type="number" name="diskon" id="diskonInput" class="w-full text-sm px-3 py-1.5 bg-white border border-gray-300 rounded text-gray-700 focus:outline-none focus:border-blue-500" value="0" min="0">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-3 items-center gap-2">
+                                <label class="text-xs font-semibold text-gray-600">Tanggal</label>
+                                <div class="col-span-2">
+                                    <input type="date" name="tanggal_transaksi" class="w-full text-sm px-3 py-1.5 bg-white border border-gray-300 rounded text-gray-700 focus:outline-none focus:border-blue-500" value="{{ date('Y-m-d') }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col gap-4">
+                            <div class="grid grid-cols-3 items-center gap-2">
+                                <label class="text-xs font-semibold text-gray-600">Total Tagihan</label>
+                                <div class="col-span-2">
+                                    <input type="text" id="totalTagihanDisplay" class="w-full text-sm px-3 py-1.5 bg-gray-200 border border-gray-300 rounded text-gray-800 font-bold focus:outline-none" readonly>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-3 items-center gap-2">
+                                <label class="text-xs font-semibold text-gray-600">Jenis Bayar</label>
+                                <div class="col-span-2">
+                                    <select name="id_pembayaran" class="w-full text-sm px-3 py-1.5 bg-white border border-gray-300 rounded text-gray-700 focus:outline-none focus:border-blue-500" required>
+                                        <option value="">Pilih Jenis Pembayaran</option>
+                                        @foreach($pembayarans as $pm)
+                                        <option value="{{ $pm->id_jenis_pembayaran }}">{{ $pm->nama_metode }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-3 items-center gap-2">
+                                <label class="text-xs font-semibold text-gray-600">Jumlah Bayar</label>
+                                <div class="col-span-2">
+                                    <input type="number" name="jumlah_bayar" id="jumlahBayarInput" class="w-full text-sm px-3 py-1.5 bg-white border border-gray-300 rounded text-gray-700 focus:outline-none focus:border-blue-500" step="0.01" required>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-3 items-center gap-2">
+                                <label class="text-xs font-semibold text-gray-600">Bukti Bayar</label>
+                                <div class="col-span-2">
+                                    <input type="file" name="bukti_bayar" id="buktiBayarInput" class="w-full text-sm file:mr-3 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 border border-gray-300 rounded bg-white text-gray-500 focus:outline-none" accept="image/*">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-3 items-center gap-2">
+                                <label class="text-xs font-semibold text-gray-600">Status</label>
+                                <div class="col-span-2">
+                                    <select name="status_pesanan_select" id="statusSelect" class="w-full text-sm px-3 py-1.5 bg-white border border-gray-300 rounded text-gray-700 focus:outline-none focus:border-blue-500">
+                                        <option value="Menunggu Konfirmasi" selected>Menunggu Konfirmasi</option>
+                                        <option value="Dikerjakan">Dikerjakan</option>
+                                        <option value="Selesai">Selesai</option>
+                                        <option value="Dibatalkan">Dibatalkan</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end gap-3 mt-4 pt-4 border-t border-gray-200">
+                        <a href="{{ route('transaksi.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white font-bold text-xs px-6 py-2.5 rounded shadow transition uppercase tracking-wider">Batal</a>
+                        <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-bold text-xs px-6 py-2.5 rounded shadow transition uppercase tracking-wider">Proses Transaksi</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    let cart = [];
+    let subtotal = 0;
+    let currentFile = null;
+    let currentFileName = '';
+    let currentProduk = null;
+
+    const swalWithBootstrapButtons = Swal.mixin({
+        customClass: {
+            confirmButton: "bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded ml-2 text-xs uppercase tracking-wider",
+            cancelButton: "bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded text-xs uppercase tracking-wider"
+        },
+        buttonsStyling: false
+    });
+
+    document.getElementById('statusSelect').addEventListener('change', function() {
+        document.getElementById('statusPesananInput').value = this.value;
+    });
+
+    function isCustomSize(ukuran) {
+        if (!ukuran) return false;
+        let ukuranLower = ukuran.toLowerCase();
+        return ukuranLower.includes('x') || ukuranLower.includes('pxl');
+    }
+
+    function resetInputForm() {
+        document.getElementById('produkSelect').value = '';
+        if (document.getElementById('panjangInput')) document.getElementById('panjangInput').value = '';
+        if (document.getElementById('lebarInput')) document.getElementById('lebarInput').value = '';
+        document.getElementById('qtyInput').value = '1';
+        document.getElementById('desainInput').value = '';
+        document.getElementById('namaFileDesain').innerHTML = '';
+        document.getElementById('hargaDisplay').value = 'Rp 0';
+        document.getElementById('ukuranEmpty').style.display = 'block';
+        document.getElementById('ukuranFixed').style.display = 'none';
+        document.getElementById('ukuranCustom').style.display = 'none';
+        currentFile = null;
+        currentFileName = '';
+        currentProduk = null;
+    }
+
+    document.getElementById('batalItemBtn').onclick = function() {
+        resetInputForm();
+    };
+
+    function updateUkuranForm() {
+        let select = document.getElementById('produkSelect');
+        let selectedOption = select.options[select.selectedIndex];
+        let ukuranDefault = selectedOption.dataset?.ukuran || '';
+        let hargaDasar = parseFloat(selectedOption.dataset?.harga) || 0;
+        let namaProduk = selectedOption.dataset?.nama || '';
+        
+        let ukuranEmpty = document.getElementById('ukuranEmpty');
+        let ukuranFixed = document.getElementById('ukuranFixed');
+        let ukuranCustom = document.getElementById('ukuranCustom');
+        
+        if (!select.value) {
+            ukuranEmpty.style.display = 'block';
+            ukuranFixed.style.display = 'none';
+            ukuranCustom.style.display = 'none';
+            document.getElementById('hargaDisplay').value = 'Rp 0';
+            currentProduk = null;
+            return;
+        }
+        
+        currentProduk = {
+            id: select.value,
+            nama: namaProduk,
+            ukuran_default: ukuranDefault,
+            harga_dasar: hargaDasar
+        };
+        
+        if (isCustomSize(ukuranDefault)) {
+            ukuranEmpty.style.display = 'none';
+            ukuranFixed.style.display = 'none';
+            ukuranCustom.style.display = 'block';
+            hitungHargaCustom();
+        } else if (ukuranDefault) {
+            ukuranEmpty.style.display = 'none';
+            document.getElementById('ukuranFixedValue').value = ukuranDefault;
+            ukuranFixed.style.display = 'block';
+            ukuranCustom.style.display = 'none';
+            document.getElementById('hargaDisplay').value = 'Rp ' + hargaDasar.toLocaleString('id-ID');
+        } else {
+            ukuranEmpty.style.display = 'block';
+            ukuranFixed.style.display = 'none';
+            ukuranCustom.style.display = 'none';
+            document.getElementById('hargaDisplay').value = 'Rp 0';
+        }
+    }
+    
+    function hitungHargaCustom() {
+        if (!currentProduk) return 0;
+        let panjang = parseFloat(document.getElementById('panjangInput').value) || 0;
+        let lebar = parseFloat(document.getElementById('lebarInput').value) || 0;
+        let totalHarga = currentProduk.harga_dasar * panjang * lebar;
+        document.getElementById('hargaDisplay').value = totalHarga === 0 ? 'Rp 0' : 'Rp ' + totalHarga.toLocaleString('id-ID');
+        return totalHarga;
+    }
+    
+    document.getElementById('produkSelect').addEventListener('change', updateUkuranForm);
+    if (document.getElementById('panjangInput')) {
+        document.getElementById('panjangInput').addEventListener('input', hitungHargaCustom);
+        document.getElementById('lebarInput').addEventListener('input', hitungHargaCustom);
+    }
+    
+    document.getElementById('desainInput').onchange = (e) => {
+        if (e.target.files.length) {
+            currentFile = e.target.files[0];
+            currentFileName = currentFile.name;
+            document.getElementById('namaFileDesain').innerHTML = currentFileName;
+        } else {
+            currentFile = null;
+            currentFileName = '';
+            document.getElementById('namaFileDesain').innerHTML = '';
+        }
+    };
+    
+    document.getElementById('pelangganSelect').onchange = function() {
+        let selectedOption = this.options[this.selectedIndex];
+        let telpon = selectedOption.getAttribute('data-telpon') || '-';
+        let alamat = selectedOption.getAttribute('data-alamat') || '-';
+        
+        document.getElementById('noTelpon').value = telpon;
+        document.getElementById('alamatPelanggan').value = alamat;
+    };
+    
+    document.getElementById('tambahItemBtn').onclick = async function() {
+        if (!currentProduk) {
+            alert('Pilih produk terlebih dahulu');
+            return;
+        }
+        
+        let ukuran = '';
+        let hargaSatuan = currentProduk.harga_dasar;
+        let isCustom = isCustomSize(currentProduk.ukuran_default);
+        
+        if (isCustom) {
+            let panjang = parseFloat(document.getElementById('panjangInput').value) || 0;
+            let lebar = parseFloat(document.getElementById('lebarInput').value) || 0;
+            if (panjang <= 0 || lebar <= 0) {
+                alert('Masukkan panjang dan lebar yang valid');
+                return;
+            }
+            hargaSatuan = currentProduk.harga_dasar * panjang * lebar;
+            ukuran = panjang + ' x ' + lebar;
+        } else if (currentProduk.ukuran_default) {
+            ukuran = currentProduk.ukuran_default;
+            hargaSatuan = currentProduk.harga_dasar;
+        } else {
+            alert('Produk tidak memiliki ukuran');
+            return;
+        }
+        
+        let qty = parseInt(document.getElementById('qtyInput').value) || 1;
+        
+        let fileBase64 = null;
+        if (currentFile) {
+            fileBase64 = await new Promise((resolve) => {
+                let reader = new FileReader();
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.readAsDataURL(currentFile);
+            });
+        }
+        
+        cart.push({
+            produk_id: currentProduk.id,
+            nama_produk: currentProduk.nama,
+            ukuran: ukuran,
+            harga_satuan: hargaSatuan,
+            qty: qty,
+            file_name: currentFileName,
+            file_base64: fileBase64,
+            file_type: currentFile ? currentFile.type : null
+        });
+        
+        updateCartDisplay();
+        resetInputForm();
+    };
+    
+    function updateCartDisplay() {
+        let html = '';
+        let total = 0;
+        
+        cart.forEach((item, idx) => {
+            let totalItem = item.harga_satuan * item.qty;
+            total += totalItem;
+            let safeNamaProduk = item.nama_produk.replace(/'/g, "\\'");
+
+            let desainPreview = '<span class="text-gray-400 italic">Tidak ada</span>';
+            if (item.file_base64) {
+                if (item.file_type && item.file_type.includes('image')) {
+                    desainPreview = `<div class="flex flex-col items-center gap-1">
+                                        <img src="data:${item.file_type};base64,${item.file_base64}" class="w-12 h-12 object-cover rounded border border-gray-300 shadow-sm mx-auto">
+                                        <span class="text-[10px] text-gray-500 max-w-[90px] truncate block" title="${item.file_name}">${item.file_name}</span>
+                                     </div>`;
+                } else {
+                    desainPreview = `<div class="flex flex-col items-center gap-0.5 text-blue-600 font-medium">
+                                        <span class="text-base">📄</span>
+                                        <span class="text-[10px] max-w-[90px] truncate block text-gray-400" title="${item.file_name}">${item.file_name}</span>
+                                     </div>`;
+                }
+            }
+
+            html += `<tr class="border-b border-gray-200 hover:bg-gray-50">
+                        <td class="p-3 text-center">${idx + 1}</td>
+                        <td class="p-3 font-medium text-gray-800">${item.nama_produk}</td>
+                        <td class="p-3 text-center">${item.ukuran}</td>
+                        <td class="p-3 text-center">${desainPreview}</td>
+                        <td class="p-3 text-right">Rp ${item.harga_satuan.toLocaleString('id-ID')}</td>
+                        <td class="p-3 text-center">
+                            <input type="number" min="1" value="${item.qty}" class="w-14 text-center text-xs p-1 border border-gray-300 rounded focus:outline-none" onchange="updateQty(${idx}, this.value)">
+                        </td>
+                        <td class="p-3 text-right font-semibold text-gray-700">Rp ${totalItem.toLocaleString('id-ID')}</td>
+                        <td class="p-3 text-center">
+                            <button type="button" class="bg-red-50 hover:bg-red-100 text-red-600 font-semibold px-2 py-1 rounded border border-red-200 transition" onclick="hapusItem(${idx}, '${safeNamaProduk}')">Hapus</button>
+                        </td>
+                    </tr>`;
+        });
+        
+        if (cart.length === 0) {
+            html = '<tr><td colspan="8" class="text-center py-10 text-gray-400 italic">Belum ada item</td></tr>';
+        }
+        
+        document.getElementById('cartTableBody').innerHTML = html;
+        subtotal = total;
+        document.getElementById('subtotalDisplay').innerHTML = 'Rp ' + total.toLocaleString('id-ID');
+        hitungTotalTagihan();
+    }
+    
+    window.updateQty = function(idx, val) {
+        let qty = parseInt(val);
+        if (!isNaN(qty) && qty > 0) {
+            cart[idx].qty = qty;
+            updateCartDisplay();
+        }
+    };
+    
+    window.hapusItem = function(idx, nama) {
+        swalWithBootstrapButtons.fire({
+            title: "Apakah Anda yakin?",
+            text: `Item "${nama}" akan dikeluarkan dari daftar belanja transaksi!`,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Ya, hapus!",
+            cancelButtonText: "Batal",
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                cart.splice(idx, 1);
+                updateCartDisplay();
+
+                Swal.fire({
+                    title: "Terhapus!",
+                    text: "Item berhasil dikeluarkan.",
+                    icon: "success",
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            }
+        });
+    };
+    
+    function hitungTotalTagihan() {
+        let diskon = parseInt(document.getElementById('diskonInput').value) || 0;
+        let totalTagihan = subtotal - diskon;
+        if (totalTagihan < 0) totalTagihan = 0;
+        document.getElementById('totalTagihanDisplay').value = 'Rp ' + totalTagihan.toLocaleString('id-ID');
+        
+        let hiddenTotal = document.querySelector('input[name="total_tagihan"]');
+        if (!hiddenTotal) {
+            hiddenTotal = document.createElement('input');
+            hiddenTotal.type = 'hidden';
+            hiddenTotal.name = 'total_tagihan';
+            document.getElementById('transaksiForm').appendChild(hiddenTotal);
+        }
+        hiddenTotal.value = totalTagihan;
+    }
+    
+    document.getElementById('diskonInput').addEventListener('input', hitungTotalTagihan);
+    
+    document.getElementById('transaksiForm').addEventListener('submit', function(e) {
+        if (cart.length === 0) {
+            e.preventDefault();
+            alert('Minimal satu produk ditambahkan');
+            return;
+        }
+        document.getElementById('statusPesananInput').value = document.getElementById('statusSelect').value;
+        
+        document.getElementById('cartInput').value = JSON.stringify(cart.map(item => ({
+            produk_id: item.produk_id,
+            qty: item.qty,
+            ukuran: item.ukuran,
+            upload_desain_base64: item.file_base64,
+            upload_desain_name: item.file_name,
+            upload_desain_type: item.file_type
+        })));
+    });
+</script>
+@endsection
