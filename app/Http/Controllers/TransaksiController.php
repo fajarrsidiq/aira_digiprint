@@ -228,7 +228,13 @@ class TransaksiController extends Controller
     //Mengarahkan langsung cetak pada halaman invoice.blade.php Anda
     public function invoice($id)
     {
-        $transaksi = Transaksi::with(['pelanggan', 'pembayaran', 'details.produk'])->findOrFail($id);
+        $transaksi = Transaksi::with([
+        'pelanggan', 
+        'pembayaran', 
+        'details.produk' => function($query) {
+            $query->withTrashed(); // Menjamin produk yang di-softdelete tetap terbaca
+        }
+        ])->findOrFail($id);
         $pdf = Pdf::loadView('transaksi.invoice', compact('transaksi'));
         return $pdf->stream('invoice-' . $transaksi->no_invoice . '.pdf');
     }

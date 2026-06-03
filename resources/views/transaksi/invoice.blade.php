@@ -70,12 +70,13 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($transaksi->details ?? $transaksi->detailTransaksi ?? [] as $index => $detail)
+                {{-- Diperbaiki: Hanya memanggil relasi 'details' yang dimuat oleh fungsi invoice di controller Anda --}}
+                @forelse($transaksi->details ?? [] as $index => $detail)
                 <tr style="border-bottom: 1px solid #000000; font-size: 11px;">
                     <td style="padding-top: 4px; padding-bottom: 4px; text-align: center; vertical-align: top;">{{ $index + 1 }}</td>
                     <td style="padding-top: 4px; padding-bottom: 4px; text-align: left; text-transform: uppercase; font-weight: bold; padding-left: 5px; vertical-align: top;">{{ $detail->produk->nama_produk ?? '-' }}</td>
-                    <td style="padding-top: 4px; padding-bottom: 4px; text-align: center; text-transform: uppercase; vertical-align: top;">{{ $detail->keterangan_ukuran ?? $detail->ukuran ?? '-' }}</td>
-                    <td style="padding-top: 4px; padding-bottom: 4px; text-align: right; vertical-align: top;">Rp {{ number_format($detail->produk->harga ?? 0, 0, ',', '.') }}</td>
+                    <td style="padding-top: 4px; padding-bottom: 4px; text-align: center; text-transform: uppercase; vertical-align: top;">{{ $detail->keterangan_ukuran ?? '-' }}</td>
+                    <td style="padding-top: 4px; padding-bottom: 4px; text-align: right; vertical-align: top;">Rp {{ number_format($detail->harga_satuan ?? $detail->produk->harga ?? 0, 0, ',', '.') }}</td>
                     <td style="padding-top: 4px; padding-bottom: 4px; text-align: center; vertical-align: top;">{{ $detail->qty }}</td>
                     <td style="padding-top: 4px; padding-bottom: 4px; text-align: right; font-weight: bold; vertical-align: top;">Rp {{ number_format($detail->subtotal, 0, ',', '.') }}</td>
                 </tr>
@@ -97,7 +98,7 @@
                         @elseif(function_exists('terbilang'))
                             {{ ucwords(terbilang($transaksi->total_tagihan)) }} Rupiah
                         @else
-                            {{ ucwords(str_replace('-', ' ', Illuminate\Support\Str::slug($transaksi->total_tagihan))) }}
+                            {{ ucwords(str_replace('-', ' ', Illuminate\Support\Str::slug($transaksi->total_tagihan))) }} Rupiah
                         @endif
                     </div>
                     
@@ -118,7 +119,8 @@
                         <tr>
                             <td style="text-align: left; color: #444444; width: 40%; vertical-align: top;">SUBTOTAL</td>
                             <td style="text-align: right; width: 15%; vertical-align: top;">Rp</td>
-                            <td style="text-align: right; font-weight: bold; width: 45%; vertical-align: top;">{{ number_format(($transaksi->details ?? $transaksi->detailTransaksi ?? collect())->sum('subtotal'), 0, ',', '.') }}</td>
+                            {{-- Diperbaiki: Menggunakan data sum subtotal dari objek relasi 'details' --}}
+                            <td style="text-align: right; font-weight: bold; width: 45%; vertical-align: top;">{{ number_format(($transaksi->details ?? collect())->sum('subtotal'), 0, ',', '.') }}</td>
                         </tr>
                         <tr>
                             <td style="text-align: left; color: #444444; vertical-align: top;">DISKON</td>
