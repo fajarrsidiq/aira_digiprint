@@ -7,9 +7,16 @@ use Illuminate\Http\Request;
 
 class SatuanController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $satuans = Satuan::latest()->paginate(10);
+        $search = $request->get('search');
+
+        $satuans = Satuan::when($search, function ($query, $search) {
+                return $query->where('nama_satuan', 'like', '%' . $search . '%');
+            })
+            ->latest()
+            ->paginate(10);
+
         return view('satuan.index', compact('satuans'));
     }
 
@@ -43,6 +50,11 @@ class SatuanController extends Controller
 
     public function destroy(Satuan $satuan)
     {
+        if ($satuan->produks()->exists()) { 
+            return redirect()->route('satuan.index')
+                ->with('error', 'Satuan "' . $satuan->nama_satuan . '" tidak bisa dihapus karena masih digunakan oleh produk!');
+        }
+        
         $satuan->delete();
         return redirect()->route('satuan.index')->with('success', 'Satuan dihapus');
     }
