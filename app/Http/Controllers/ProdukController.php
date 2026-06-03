@@ -10,9 +10,17 @@ use Illuminate\Support\Facades\Storage;
 
 class ProdukController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $produks = Produk::with(['bahan', 'satuan'])->latest()->paginate(10);
+        $search = $request->get('search');
+
+        $produks = Produk::with(['bahan', 'satuan'])
+        ->when($search, function ($query, $search) {
+                return $query->where('nama_produk', 'like', '%' . $search . '%');
+            })
+            ->latest()
+            ->paginate(10);
+
         return view('produk.index', compact('produks'));
     }
 
