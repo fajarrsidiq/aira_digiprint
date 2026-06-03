@@ -9,9 +9,16 @@ use Illuminate\Validation\Rule;
 
 class PelangganController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $pelanggans = Pelanggan::latest()->paginate(10);
+        $search = $request->get('search');
+
+        $pelanggans = Pelanggan::when($search, function ($query, $search) {
+                return $query->where('username', 'like', '%' . $search . '%');
+            })
+            ->latest()
+            ->paginate(10);
+
         return view('pelanggan.index', compact('pelanggans'));
     }
 
@@ -68,8 +75,11 @@ class PelangganController extends Controller
 
     public function destroy(Pelanggan $pelanggan)
     {
-        // Cek apakah pelanggan memiliki transaksi (jika ada relasi, bisa dicegah)
-        // if ($pelanggan->transaksi()->count() > 0) { ... }
+        if ($pelanggan->transaksis()->exists()) {
+            return redirect()->route('pelanggan.index')
+                ->with('error', 'Pelanggan "' . $pelanggan->username . '" tidak bisa dihapus karena memiliki riwayat transaksi!');
+        }
+        
         $pelanggan->delete();
         return redirect()->route('pelanggan.index')->with('success', 'Pelanggan berhasil dihapus.');
     }

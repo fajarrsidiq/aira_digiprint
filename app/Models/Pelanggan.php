@@ -10,4 +10,9 @@ class Pelanggan extends Authenticatable
     protected $primaryKey = 'id_pelanggan';
     protected $fillable = ['username', 'password', 'alamat', 'no_telpon'];
     protected $hidden = ['password', 'remember_token'];
+
+    public function transaksis()
+    {
+        return $this->hasMany(Transaksi::class, 'id_pelanggan', 'id_pelanggan');
+    }
 }
