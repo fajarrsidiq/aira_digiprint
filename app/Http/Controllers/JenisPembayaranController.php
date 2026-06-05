@@ -7,9 +7,16 @@ use Illuminate\Http\Request;
 
 class JenisPembayaranController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $jenisPembayaran = JenisPembayaran::latest()->paginate(10);
+        $search = $request->get('search');
+
+        $jenisPembayaran = JenisPembayaran::when($search, function ($query, $search) {
+                return $query->where('nama_metode', 'like', '%' . $search . '%');
+            })
+            ->latest()
+            ->paginate(10);
+
         return view('jenis_pembayaran.index', compact('jenisPembayaran'));
     }
 
@@ -49,6 +56,11 @@ class JenisPembayaranController extends Controller
 
     public function destroy(JenisPembayaran $jenispembayaran)
     {
+        if ($jenispembayaran->transaksis()->exists()) {
+            return redirect()->route('jenispembayaran.index')
+                ->with('error', 'Jenis pembayaran "' . $jenispembayaran->nama_metode . '" tidak bisa dihapus karena memiliki riwayat transaksi!');
+        }
+
         $jenispembayaran->delete();
         return redirect()->route('jenispembayaran.index')->with('success', 'Jenis pembayaran berhasil dihapus.');
     }

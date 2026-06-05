@@ -9,9 +9,17 @@ use Illuminate\Validation\Rule;
 
 class PetugasController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $petugas = Petugas::orderBy('level')->paginate(10);
+        $search = $request->get('search');
+
+        $petugas = Petugas::when($search, function ($query, $search) {
+                return $query->where('nama_lengkap', 'like', '%' . $search . '%')
+                             ->orWhere('username', 'like', '%' . $search . '%');
+            })
+            ->orderBy('level')
+            ->paginate(10);
+
         return view('petugas.index', compact('petugas'));
     }
 
@@ -75,6 +83,12 @@ class PetugasController extends Controller
         if ($petugas->level === 'Owner') {
             return back()->with('error', 'Owner tidak dapat dihapus.');
         }
+
+        if ($petugas->transaksis()->exists()) {
+            return redirect()->route('petugas.index')
+                ->with('error', 'Petugas "' . $petugas->nama_lengkap . '" tidak bisa dihapus karena namanya tercatat dalam riwayat transaksi!');
+        }
+        
         $petugas->delete();
         return redirect()->route('petugas.index')->with('success', 'Petugas berhasil dihapus.');
     }

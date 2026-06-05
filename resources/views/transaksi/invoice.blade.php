@@ -70,7 +70,6 @@
                 </tr>
             </thead>
             <tbody>
-                {{-- Diperbaiki: Hanya memanggil relasi 'details' yang dimuat oleh fungsi invoice di controller Anda --}}
                 @forelse($transaksi->details ?? [] as $index => $detail)
                 <tr style="border-bottom: 1px solid #000000; font-size: 11px;">
                     <td style="padding-top: 4px; padding-bottom: 4px; text-align: center; vertical-align: top;">{{ $index + 1 }}</td>
@@ -93,13 +92,41 @@
                 <td style="width: 52%; vertical-align: top;">
                     <div style="font-style: italic; margin-bottom: 25px; line-height: 1.4;">
                         <span style="font-weight: bold; font-style: normal;">Terbilang :</span> 
-                        @if(class_exists('Terbilang'))
-                            {{ ucwords(Terbilang::make($transaksi->total_tagihan)) }} Rupiah
-                        @elseif(function_exists('terbilang'))
-                            {{ ucwords(terbilang($transaksi->total_tagihan)) }} Rupiah
-                        @else
-                            {{ ucwords(str_replace('-', ' ', Illuminate\Support\Str::slug($transaksi->total_tagihan))) }} Rupiah
-                        @endif
+                        @php
+                            function konversiTerbilang($angka) {
+                                $angka = abs($angka);
+                                $baca = array("", "satu", "dua", "tiga", "empat", "lima", "enam", "tujuh", "delapan", "sembilan", "sepuluh", "sebelas");
+                                $terbilang = "";
+                                
+                                if ($angka < 12) {
+                                    $terbilang = " " . $baca[$angka];
+                                } else if ($angka < 20) {
+                                    $terbilang = konversiTerbilang($angka - 10) . " belas";
+                                } else if ($angka < 100) {
+                                    $terbilang = konversiTerbilang(floor($angka / 10)) . " puluh" . konversiTerbilang($angka % 10);
+                                } else if ($angka < 200) {
+                                    $terbilang = " seratus" . konversiTerbilang($angka - 100);
+                                } else if ($angka < 1000) {
+                                    $terbilang = konversiTerbilang(floor($angka / 100)) . " ratus" . konversiTerbilang($angka % 100);
+                                } else if ($angka < 2000) {
+                                    $terbilang = " seribu" . konversiTerbilang($angka - 1000);
+                                } else if ($angka < 1000000) {
+                                    $terbilang = konversiTerbilang(floor($angka / 1000)) . " ribu" . konversiTerbilang($angka % 1000);
+                                } else if ($angka < 1000000000) {
+                                    $terbilang = konversiTerbilang(floor($angka / 1000000)) . " juta" . konversiTerbilang($angka % 1000000);
+                                } else if ($angka < 1000000000000) {
+                                    $terbilang = konversiTerbilang(floor($angka / 1000000000)) . " milyar" . konversiTerbilang(fmod($angka, 1000000000));
+                                }
+                                return $terbilang;
+                            }
+
+                            $total = $transaksi->total_tagihan ?? 0;
+                            if($total == 0) {
+                                echo "Nol Rupiah";
+                            } else {
+                                echo ucwords(trim(konversiTerbilang($total))) . " Rupiah";
+                            }
+                        @endphp
                     </div>
                     
                     <table style="width: 100%; border-collapse: collapse; text-align: center;">
@@ -119,7 +146,6 @@
                         <tr>
                             <td style="text-align: left; color: #444444; width: 40%; vertical-align: top;">SUBTOTAL</td>
                             <td style="text-align: right; width: 15%; vertical-align: top;">Rp</td>
-                            {{-- Diperbaiki: Menggunakan data sum subtotal dari objek relasi 'details' --}}
                             <td style="text-align: right; font-weight: bold; width: 45%; vertical-align: top;">{{ number_format(($transaksi->details ?? collect())->sum('subtotal'), 0, ',', '.') }}</td>
                         </tr>
                         <tr>
@@ -159,7 +185,6 @@
             <tr>
                 <td style="vertical-align: top;">
                     <div style="font-weight: bold; margin-top: 5px; margin-bottom: 3px;">Perhatian :</div>
-                    
                     <table style="width: 100%; border-collapse: collapse; font-size: 10px; line-height: 1.4;">
                         <tr>
                             <td style="width: 15px; vertical-align: top;">1.</td>

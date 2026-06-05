@@ -10,4 +10,9 @@ class Petugas extends Authenticatable
     protected $primaryKey = 'id_petugas';
     protected $fillable = ['username', 'email', 'password', 'nama_lengkap', 'level'];
     protected $hidden = ['password', 'remember_token'];
+
+    public function transaksis()
+    {
+        return $this->hasMany(Transaksi::class, 'id_petugas', 'id_petugas');
+    }
 }
