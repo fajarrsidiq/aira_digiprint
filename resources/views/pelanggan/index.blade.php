@@ -38,10 +38,10 @@
             <thead class="bg-gray-100">
                 <tr>
                     <th class="border p-2 w-12 text-center">#</th>
+                    <th class="border p-2 text-left">Nama Lengkap</th>
                     <th class="border p-2 text-left">Username</th>
                     <th class="border p-2 text-left">Alamat</th>
                     <th class="border p-2 text-left">No Telepon</th>
-                    <th class="border p-2 text-center w-28">Dibuat</th>
                     <th class="border p-2 text-center w-40">Aksi</th>
                 </tr>
             </thead>
@@ -49,13 +49,13 @@
                 @forelse($pelanggans as $index => $p)
                 <tr>
                     <td class="border p-2 text-center">{{ $pelanggans->firstItem() + $index }}</td>
+                    <td class="border p-2 font-medium text-gray-900">{{ $p->nama_pelanggan }}</td>
                     <td class="border p-2">{{ $p->username }}</td>
                     <td class="border p-2">{{ $p->alamat ?? '-' }}</td>
                     <td class="border p-2">{{ $p->no_telpon ?? '-' }}</td>
-                    <td class="border p-2 text-center">{{ $p->created_at->format('d/m/Y') }}</td>
                     <td class="border p-2 text-center">
                         <a href="{{ route('pelanggan.edit', $p->id_pelanggan) }}" class="text-yellow-600 mr-2 hover:underline">Edit</a>
-                        <button type="button" class="text-red-600 hover:text-red-800 hover:underline" onclick="confirmDelete({{ $p->id_pelanggan }}, '{{ $p->username }}')">Hapus</button>
+                        <button type="button" class="text-red-600 hover:text-red-800 hover:underline" onclick="confirmDelete({{ $p->id_pelanggan }}, '{{ $p->nama_pelanggan }}')">Hapus</button>
                         <form id="delete-form-{{ $p->id_pelanggan }}" action="{{ route('pelanggan.destroy', $p->id_pelanggan) }}" method="POST" style="display:none;">
                             @csrf
                             @method('DELETE')
