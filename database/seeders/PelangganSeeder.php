@@ -16,6 +16,7 @@ class PelangganSeeder extends Seeder
     {
         Pelanggan::create([
             'username' => 'pelanggan1',
+            'nama_pelanggan' => 'pelanggan',
             'password' => Hash::make('password'),
             'alamat' => 'Jl. Contoh No. 1',
             'no_telpon' => '08123456789',

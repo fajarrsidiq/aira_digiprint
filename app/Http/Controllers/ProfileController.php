@@ -42,7 +42,7 @@ class ProfileController extends Controller
             $user = Auth::guard('pelanggan')->user();
 
             $validated = $request->validate([
-                'username' => 'required|string|max:255|unique:pelanggan,username,' . $user->id_pelanggan . ',id_pelanggan',
+                'nama_pelanggan' => 'required|string|max:255',
                 'alamat' => 'nullable|string',
                 'no_telpon' => 'nullable|string|max:15',
             ]);

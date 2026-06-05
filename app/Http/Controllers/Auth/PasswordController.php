@@ -23,6 +23,8 @@ class PasswordController extends Controller
             return redirect()->route('login');
         }
 
+        /** @var \App\Models\Petugas|\App\Models\Pelanggan $user */
+
         $request->validate([
             'current_password' => ['required', function ($attribute, $value, $fail) use ($user) {
                 if (!Hash::check($value, $user->password)) {
@@ -32,7 +34,7 @@ class PasswordController extends Controller
             'password' => ['required', 'confirmed', Password::defaults()],
         ]);
 
-        // Update password
+        // Mengubah nilai property password secara langsung
         $user->update(['password' => Hash::make($request->password)]);
 
         // Login ulang dengan guard yang sama

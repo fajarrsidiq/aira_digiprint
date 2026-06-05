@@ -13,7 +13,7 @@
                             <span class="text-sm font-medium text-gray-700">{{ Auth::guard('petugas')->user()->nama_lengkap }}</span>
                             <span class="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">{{ Auth::guard('petugas')->user()->level }}</span>
                         @else
-                            <span class="text-sm font-medium text-gray-700">{{ Auth::guard('pelanggan')->user()->username }}</span>
+                            <span class="text-sm font-medium text-gray-700">{{ Auth::guard('pelanggan')->user()->nama_pelanggan }}</span>
                         @endif
                         <i class="fas fa-chevron-down text-xs text-gray-500"></i>
                     </button>

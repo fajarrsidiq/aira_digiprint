@@ -8,7 +8,7 @@ class Pelanggan extends Authenticatable
 {
     protected $table = 'pelanggan';
     protected $primaryKey = 'id_pelanggan';
-    protected $fillable = ['username', 'password', 'alamat', 'no_telpon'];
+    protected $fillable = ['username', 'nama_pelanggan', 'password', 'alamat', 'no_telpon'];
     protected $hidden = ['password', 'remember_token'];
 
     public function transaksis()
