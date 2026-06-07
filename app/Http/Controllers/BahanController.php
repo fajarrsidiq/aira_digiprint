@@ -29,6 +29,11 @@ class BahanController extends Controller
     {
         $request->validate([
             'nama_bahan' => 'required|string|max:100|unique:m_bahan',
+        ], [
+            'nama_bahan.required' => 'Kolom Nama Bahan wajib diisi.',
+            'nama_bahan.string' => 'Nama bahan harus berupa teks.',
+            'nama_bahan.max' => 'Nama bahan maksimal terdiri dari 100 karakter.',
+            'nama_bahan.unique' => 'Nama bahan sudah terdaftar, silakan gunakan nama yang lain.',
         ]);
         Bahan::create($request->all());
         return redirect()->route('bahan.index')->with('sucess', 'Bahan berhasil ditambahkan.');
@@ -43,6 +48,11 @@ class BahanController extends Controller
     {
         $request->validate([
             'nama_bahan' => 'required|string|max:100|unique:m_bahan,nama_bahan,' . $bahan->id_bahan . ',id_bahan',
+        ], [
+            'nama_bahan.required' => 'Kolom Nama Bahan wajib diisi.',
+            'nama_bahan.string' => 'Nama bahan harus berupa teks.',
+            'nama_bahan.max' => 'Nama bahan maksimal terdiri dari 100 karakter.',
+            'nama_bahan.unique' => 'Nama bahan sudah terdaftar, silakan gunakan nama yang lain.',
         ]);
         $bahan->update($request->all());
         return redirect()->route('bahan.index')->with('success', 'Bahan berhasil diperbarui.');
@@ -50,10 +60,11 @@ class BahanController extends Controller
 
     public function destroy(Bahan $bahan)
     {
-        if ($bahan->produks()->exists()) {
+        if ($bahan->produks()->withTrashed()->exists()) {
             return redirect()->route('bahan.index')
-            ->with('error', 'Bahan "' . $bahan->nama_bahan . '" tidak bisa dihapus karena masih digunakan oleh produk!');
+                ->with('error', 'Bahan "' . $bahan->nama_bahan . '" tidak bisa dihapus karena masih digunakan oleh produk!');
         }
+
         $bahan->delete();
         return redirect()->route('bahan.index')->with('success', 'Bahan berhasil dihapus.');
     }
