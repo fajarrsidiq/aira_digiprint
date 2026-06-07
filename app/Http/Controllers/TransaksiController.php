@@ -241,12 +241,11 @@ class TransaksiController extends Controller
     public function invoice($id)
     {
         $transaksi = Transaksi::with([
-        'pelanggan', 
-        'pembayaran', 
-        'details.produk' => function($query) {
-            $query->withTrashed(); // Menjamin produk yang di-softdelete tetap terbaca
-        }
+            'pelanggan', 
+            'pembayaran', 
+            'details.produk' 
         ])->findOrFail($id);
+
         $pdf = Pdf::loadView('transaksi.invoice', compact('transaksi'));
         return $pdf->stream('invoice-' . $transaksi->no_invoice . '.pdf');
     }

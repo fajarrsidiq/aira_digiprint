@@ -37,25 +37,14 @@
                 <tbody class="text-gray-600 divide-y divide-gray-200">
                     @forelse(($transaksi->details ?? []) as $index => $detail)
                     @php
-                        // Deteksi otomatis variabel qty / Qty / QUANTITY
                         $qty = $detail->qty ?? $detail->Qty ?? $detail->quantity ?? 0;
-                        
-                        // Deteksi otomatis variabel harga satuan
                         $harga = $detail->harga_satuan ?? $detail->harga ?? $detail->Harga ?? 0;
-                        
-                        // Deteksi otomatis variabel subtotal total item
                         $totalItem = $detail->subtotal ?? $detail->total ?? $detail->Total ?? ($harga * $qty);
-                        
-                        // Jika harga masih 0 tetapi subtotal ada, hitung mundur harganya
-                        if ($harga == 0 && $totalItem > 0 && $qty > 0) {
-                            $harga = $totalItem / $qty;
-                        }
+                        if ($harga == 0 && $totalItem > 0 && $qty > 0) { $harga = $totalItem / $qty; }
                     @endphp
                     <tr class="hover:bg-gray-50 transition-colors">
                         <td class="p-3 border-r text-center">{{ $index + 1 }}</td>
-                        <td class="p-3 border-r font-medium text-gray-900">
-                            {{ $detail->produk->nama_produk ?? 'Produk Tidak Diketahui' }}
-                        </td>
+                        <td class="p-3 border-r font-medium text-gray-900">{{ $detail->produk->nama_produk ?? 'Produk Tidak Diketahui' }}</td>
                         <td class="p-3 border-r text-center text-gray-500">{{ $detail->keterangan_ukuran ?? $detail->ukuran ?? '-' }}</td>
                         <td class="p-3 border-r text-right">Rp {{ number_format($harga, 0, ',', '.') }}</td>
                         <td class="p-3 border-r text-center font-medium">{{ $qty }}</td>
@@ -72,7 +61,30 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
             <div>
-                <p class="italic text-gray-600">Terbilang: <span class="font-medium text-gray-800"># {{ \Str::title($transaksi->total_tagihan) }} Rupiah #</span></p>
+                <p class="italic text-gray-600">
+                    <span style="font-weight: bold; font-style: normal;">Terbilang :</span>
+                    <span class="font-medium text-gray-800">
+                        @php
+                            function konversiTerbilang($angka) {
+                                $angka = abs($angka);
+                                $baca = array("", "satu", "dua", "tiga", "empat", "lima", "enam", "tujuh", "delapan", "sembilan", "sepuluh", "sebelas");
+                                $terbilang = "";
+                                if ($angka < 12) { $terbilang = " " . $baca[$angka]; }
+                                else if ($angka < 20) { $terbilang = konversiTerbilang($angka - 10) . " belas"; }
+                                else if ($angka < 100) { $terbilang = konversiTerbilang(floor($angka / 10)) . " puluh" . konversiTerbilang($angka % 10); }
+                                else if ($angka < 200) { $terbilang = " seratus" . konversiTerbilang($angka - 100); }
+                                else if ($angka < 1000) { $terbilang = konversiTerbilang(floor($angka / 100)) . " ratus" . konversiTerbilang($angka % 100); }
+                                else if ($angka < 2000) { $terbilang = " seribu" . konversiTerbilang($angka - 1000); }
+                                else if ($angka < 1000000) { $terbilang = konversiTerbilang(floor($angka / 1000)) . " ribu" . konversiTerbilang($angka % 1000); }
+                                else if ($angka < 1000000000) { $terbilang = konversiTerbilang(floor($angka / 1000000)) . " juta" . konversiTerbilang($angka % 1000000); }
+                                else if ($angka < 1000000000000) { $terbilang = konversiTerbilang(floor($angka / 1000000000)) . " milyar" . konversiTerbilang(fmod($angka, 1000000000)); }
+                                return $terbilang;
+                            }
+                            $total = $transaksi->total_tagihan ?? 0;
+                            if($total == 0) { echo "Nol"; } else { echo ucwords(trim(konversiTerbilang($total))); }
+                        @endphp Rupiah
+                    </span>
+                </p>
                 <div class="mt-4 p-3 bg-white border rounded">
                     <span class="text-gray-500 block text-xs mb-1">- Rincian Pembayaran Sebelumnya:</span>
                     <strong class="text-gray-800">Rp {{ number_format($transaksi->jumlah_bayar, 0, ',', '.') }} ({{ strtoupper($transaksi->pembayaran->nama_metode ?? 'TUNAI') }})</strong>
@@ -111,7 +123,6 @@
                     <div>
                         <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Tgl Pelunasan</label>
                         <input type="date" name="tanggal_pelunasan" value="{{ date('Y-m-d') }}" class="w-full border p-2 rounded focus:ring bg-white text-gray-800" required>
-                        <p class="text-[11px] text-blue-500 italic mt-1">Tanggal Pelunasan tidak boleh mundur dan hanya boleh maju 2 days.</p>
                     </div>
                 </div>
 

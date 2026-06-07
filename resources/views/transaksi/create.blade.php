@@ -21,7 +21,7 @@
                                 <input type="text" name="no_invoice" class="w-full text-sm px-3 py-2 bg-gray-200 border border-gray-300 rounded text-gray-700 font-medium focus:outline-none" id="invoiceNumber" readonly value="{{ $invoiceOtomatis ?? 'INV-'.date('dmy') }}">
                             </div>
                             <div class="flex flex-col gap-1.5">
-                                <label class="text-xs font-semibold text-gray-600">Produk</label>
+                                <label class="text-xs font-semibold text-gray-600">Produk<span class="text-red-500">*</span></label>
                                 <select id="produkSelect" class="w-full text-sm px-3 py-2 bg-white border border-gray-300 rounded text-gray-700 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
                                     <option value="">-- Pilih Produk --</option>
                                     @foreach($produks as $p)
@@ -32,7 +32,7 @@
                                 </select>
                             </div>
                             <div class="flex flex-col gap-1.5">
-                                <label class="text-xs font-semibold text-gray-600">Ukuran</label>
+                                <label class="text-xs font-semibold text-gray-600">Ukuran<span class="text-red-500">*</span></label>
                                 <div id="ukuranFixed" style="display: none;">
                                     <input type="text" id="ukuranFixedValue" class="w-full text-sm px-3 py-2 bg-gray-200 border border-gray-300 rounded text-gray-700 focus:outline-none" readonly>
                                 </div>
@@ -60,7 +60,7 @@
                                 <input type="text" id="hargaDisplay" class="w-full text-sm px-3 py-2 bg-gray-200 border border-gray-300 rounded text-gray-700 font-bold focus:outline-none" readonly value="Rp 0">
                             </div>
                             <div class="flex flex-col gap-1.5">
-                                <label class="text-xs font-semibold text-gray-600">Qty</label>
+                                <label class="text-xs font-semibold text-gray-600">Qty<span class="text-red-500">*</span></label>
                                 <input type="number" id="qtyInput" class="w-full text-sm px-3 py-2 bg-white border border-gray-300 rounded text-gray-700 focus:outline-none focus:border-blue-500" value="1" min="1">
                             </div>
                             <div class="flex flex-col gap-1.5">
@@ -118,7 +118,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4">
                         <div class="flex flex-col gap-4">
                             <div class="grid grid-cols-3 items-center gap-2">
-                                <label class="text-xs font-semibold text-gray-600">Pelanggan</label>
+                                <label class="text-xs font-semibold text-gray-600">Pelanggan<span class="text-red-500">*</span></label>
                                 <div class="col-span-2">
                                     <select name="id_pelanggan" id="pelangganSelect" class="w-full text-sm px-3 py-1.5 bg-white border border-gray-300 rounded text-gray-700 focus:outline-none focus:border-blue-500" required>
                                         <option value="">Pilih Pelanggan</option>
@@ -164,7 +164,7 @@
                                 </div>
                             </div>
                             <div class="grid grid-cols-3 items-center gap-2">
-                                <label class="text-xs font-semibold text-gray-600">Jenis Bayar</label>
+                                <label class="text-xs font-semibold text-gray-600">Jenis Bayar<span class="text-red-500">*</span></label>
                                 <div class="col-span-2">
                                     <select name="id_pembayaran" class="w-full text-sm px-3 py-1.5 bg-white border border-gray-300 rounded text-gray-700 focus:outline-none focus:border-blue-500" required>
                                         <option value="">Pilih Jenis Pembayaran</option>
@@ -175,7 +175,7 @@
                                 </div>
                             </div>
                             <div class="grid grid-cols-3 items-center gap-2">
-                                <label class="text-xs font-semibold text-gray-600">Jumlah Bayar</label>
+                                <label class="text-xs font-semibold text-gray-600">Jumlah Bayar<span class="text-red-500">*</span></label>
                                 <div class="col-span-2">
                                     <input type="number" name="jumlah_bayar" id="jumlahBayarInput" class="w-full text-sm px-3 py-1.5 bg-white border border-gray-300 rounded text-gray-700 focus:outline-none focus:border-blue-500" step="0.01" required>
                                 </div>
@@ -187,7 +187,7 @@
                                 </div>
                             </div>
                             <div class="grid grid-cols-3 items-center gap-2">
-                                <label class="text-xs font-semibold text-gray-600">Status</label>
+                                <label class="text-xs font-semibold text-gray-600">Status<span class="text-red-500">*</span></label>
                                 <div class="col-span-2">
                                     <select name="status_pesanan_select" id="statusSelect" class="w-full text-sm px-3 py-1.5 bg-white border border-gray-300 rounded text-gray-700 focus:outline-none focus:border-blue-500">
                                         <option value="Menunggu Konfirmasi" selected>Menunggu Konfirmasi</option>
