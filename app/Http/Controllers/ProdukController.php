@@ -14,13 +14,13 @@ class ProdukController extends Controller
     {
         $search = $request->get('search');
 
-        $produks = Produk::with(['bahan', 'satuan'])
-        ->when($search, function ($query, $search) {
+        $produks = Produk::withTrashed()->with(['bahan', 'satuan'])
+            ->when($search, function ($query, $search) {
                 return $query->where('nama_produk', 'like', '%' . $search . '%');
             })
             ->latest()
             ->paginate(10);
-
+            
         return view('produk.index', compact('produks'));
     }
 

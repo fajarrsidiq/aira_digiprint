@@ -27,7 +27,15 @@ class SatuanController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate(['nama_satuan' => 'required|unique:m_satuan']);
+        $request->validate([
+            'nama_satuan' => 'required|unique:m_satuan'
+            ], [
+            'nama_satuan.required' => 'Kolom Nama Satuan wajib diisi.',
+            'nama_satuan.string'   => 'Nama satuan harus berupa teks.',
+            'nama_satuan.max'      => 'Nama satuan maksimal terdiri dari 50 karakter.',
+            'nama_satuan.unique'   => 'Nama satuan sudah terdaftar, silakan gunakan nama yang lain.',
+        ]);
+
         Satuan::create($request->all());
         return redirect()->route('satuan.index')->with('success', 'Satuan ditambahkan');
     }
@@ -41,6 +49,11 @@ class SatuanController extends Controller
     {
         $request->validate([
             'nama_satuan' => 'required|unique:m_satuan,nama_satuan,' . $satuan->id_satuan . ',id_satuan'
+        ], [
+            'nama_satuan.required' => 'Kolom Nama Satuan wajib diisi.',
+            'nama_satuan.string'   => 'Nama satuan harus berupa teks.',
+            'nama_satuan.max'      => 'Nama satuan maksimal terdiri dari 50 karakter.',
+            'nama_satuan.unique'   => 'Nama satuan sudah terdaftar, silakan gunakan nama yang lain.',
         ]);
 
         $satuan->update($request->all());
