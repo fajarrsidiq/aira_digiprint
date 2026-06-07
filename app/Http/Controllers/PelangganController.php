@@ -13,8 +13,10 @@ class PelangganController extends Controller
     {
         $search = $request->get('search');
 
+        // Menyempurnakan pencarian agar kasir bisa mencari berdasarkan nama ATAU username
         $pelanggans = Pelanggan::when($search, function ($query, $search) {
-                return $query->where('nama_pelanggan', 'like', '%' . $search . '%');
+                return $query->where('nama_pelanggan', 'like', '%' . $search . '%')
+                             ->orWhere('username', 'like', '%' . $search . '%');
             })
             ->latest()
             ->paginate(10);
@@ -29,27 +31,27 @@ class PelangganController extends Controller
 
     public function store(Request $request)
     {
+        // Menyinkronkan target kolom unique secara eksplisit ke 'username'
         $request->validate([
             'nama_pelanggan' => 'required|string|max:255',
-            'username' => 'required|string|max:255|unique:pelanggan',
-            'alamat' => 'nullable|string',
-            'no_telpon' => 'nullable|string|max:15',
+            'username'       => 'required|string|max:255|unique:pelanggan,username',
+            'alamat'         => 'nullable|string',
+            'no_telpon'      => 'nullable|string|max:15',
         ], [
             'nama_pelanggan.required' => 'Kolom Nama Lengkap wajib diisi.',
-            'username.required' => 'Kolom Username wajib diisi.',
-            'username.unique' => 'Username sudah terdaftar, silakan gunakan username yang lain.',
-            'no_telpon.max' => 'No. Telepon maksimal terdiri dari 15 karakter.',
+            'username.required'       => 'Kolom Username wajib diisi.',
+            'username.unique'         => 'Username sudah terdaftar, silakan gunakan username yang lain.',
+            'no_telpon.max'           => 'No. Telepon maksimal terdiri dari 15 karakter.',
         ]);
 
-        // Password default
-        $defaultPassword = 'pelanggan123'; // bisa diganti
+        $defaultPassword = 'pelanggan123';
 
         Pelanggan::create([
             'nama_pelanggan' => $request->nama_pelanggan,
-            'username' => $request->username,
-            'password' => Hash::make($defaultPassword),
-            'alamat' => $request->alamat,
-            'no_telpon' => $request->no_telpon,
+            'username'       => $request->username,
+            'password'       => Hash::make($defaultPassword),
+            'alamat'         => $request->alamat,
+            'no_telpon'      => $request->no_telpon,
         ]);
 
         return redirect()->route('pelanggan.index')->with('success', 'Pelanggan berhasil ditambahkan (password default: ' . $defaultPassword . ')');
@@ -64,20 +66,19 @@ class PelangganController extends Controller
     {
         $request->validate([
             'nama_pelanggan' => 'required|string|max:255',
-            'username' => ['required', 'string', 'max:255', Rule::unique('pelanggan')->ignore($pelanggan->id_pelanggan, 'id_pelanggan')],
-            'alamat' => 'nullable|string',
-            'no_telpon' => 'nullable|string|max:15',
+            'username'       => ['required', 'string', 'max:255', Rule::unique('pelanggan', 'username')->ignore($pelanggan->id_pelanggan, 'id_pelanggan')],
+            'alamat'         => 'nullable|string',
+            'no_telpon'      => 'nullable|string|max:15',
             'reset_password' => 'nullable|boolean',
         ], [
             'nama_pelanggan.required' => 'Kolom Nama Lengkap wajib diisi.',
-            'username.required' => 'Kolom Username wajib diisi.',
-            'username.unique' => 'Username sudah terdaftar, silakan gunakan username yang lain.',
-            'no_telpon.max' => 'No. Telepon maksimal terdiri dari 15 karakter.',
+            'username.required'       => 'Kolom Username wajib diisi.',
+            'username.unique'         => 'Username sudah terdaftar, silakan gunakan username yang lain.',
+            'no_telpon.max'           => 'No. Telepon maksimal terdiri dari 15 karakter.',
         ]);
 
         $data = $request->only(['nama_pelanggan', 'username', 'alamat', 'no_telpon']);
 
-        // Cek jika kasir mencentang opsi reset password
         if ($request->boolean('reset_password')) {
             $data['password'] = Hash::make('pelanggan123');
         }

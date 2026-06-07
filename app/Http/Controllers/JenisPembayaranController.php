@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\JenisPembayaran;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class JenisPembayaranController extends Controller
 {
@@ -28,9 +29,15 @@ class JenisPembayaranController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nama_metode' => 'required|string|max:50|unique:jenis_pembayaran',
+            'nama_metode' => 'required|string|max:50|unique:jenis_pembayaran,nama_metode',
             'no_rekening' => 'nullable|string|max:50',
-            'atas_nama' => 'nullable|string|max:100',
+            'atas_nama'   => 'nullable|string|max:100',
+        ], [
+            'nama_metode.required' => 'Kolom Nama Metode pembayaran wajib diisi.',
+            'nama_metode.max'      => 'Nama metode maksimal terdiri dari 50 karakter.',
+            'nama_metode.unique'   => 'Nama metode pembayaran sudah terdaftar, gunakan nama lain.',
+            'no_rekening.max'      => 'Nomor rekening maksimal terdiri dari 50 karakter.',
+            'atas_nama.max'        => 'Nama pemilik rekening maksimal terdiri dari 100 karakter.',
         ]);
 
         JenisPembayaran::create($request->all());
@@ -45,9 +52,20 @@ class JenisPembayaranController extends Controller
     public function update(Request $request, JenisPembayaran $jenispembayaran)
     {
         $request->validate([
-            'nama_metode' => 'required|string|max:50|unique:jenis_pembayaran,nama_metode,' . $jenispembayaran->id_jenis_pembayaran . ',id_jenis_pembayaran',
+            'nama_metode' => [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique('jenis_pembayaran', 'nama_metode')->ignore($jenispembayaran->id_jenis_pembayaran, 'id_jenis_pembayaran')
+            ],
             'no_rekening' => 'nullable|string|max:50',
-            'atas_nama' => 'nullable|string|max:100',
+            'atas_nama'   => 'nullable|string|max:100',
+        ], [
+            'nama_metode.required' => 'Kolom Nama Metode pembayaran wajib diisi.',
+            'nama_metode.max'      => 'Nama metode maksimal terdiri dari 50 karakter.',
+            'nama_metode.unique'   => 'Nama metode pembayaran sudah terdaftar, gunakan nama lain.',
+            'no_rekening.max'      => 'Nomor rekening maksimal terdiri dari 50 karakter.',
+            'atas_nama.max'        => 'Nama pemilik rekening maksimal terdiri dari 100 karakter.',
         ]);
 
         $jenispembayaran->update($request->all());
