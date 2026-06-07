@@ -115,6 +115,11 @@ class ProdukController extends Controller
 
     public function destroy(Produk $produk)
     {
+        if ($produk->details()->exists()) {
+            return redirect()->route('produk.index')
+                ->with('error', 'Produk "' . $produk->nama_produk . '" tidak bisa dihapus karena sudah memiliki riwayat transaksi!');
+        }
+
         if ($produk->foto_produk) {
             Storage::disk('public')->delete($produk->foto_produk);
         }
