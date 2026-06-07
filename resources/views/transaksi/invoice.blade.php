@@ -38,7 +38,7 @@
                         </tr>
                         <tr>
                             <td style="color: #555555; vertical-align: top;">Yth,</td>
-                            <td style="text-transform: uppercase; font-weight: bold; vertical-align: top;">: {{ $transaksi->pelanggan->username ?? '-' }}</td>
+                            <td style="text-transform: uppercase; font-weight: bold; vertical-align: top;">: {{ $transaksi->pelanggan->nama_pelanggan ?? '-' }}</td>
                         </tr>
                         <tr>
                             <td style="color: #555555; vertical-align: top;">Telp.</td>
@@ -135,7 +135,7 @@
                             <td style="width: 50%; padding-bottom: 45px; color: #333333; vertical-align: top;">Hormat Kami,</td>
                         </tr>
                         <tr style="font-weight: bold; text-transform: uppercase;">
-                            <td style="vertical-align: top;">( {{ $transaksi->pelanggan->username ?? '...................' }} )</td>
+                            <td style="vertical-align: top;">( {{ $transaksi->pelanggan->nama_pelanggan ?? '...................' }} )</td>
                             <td style="vertical-align: top;">( Admin )</td>
                         </tr>
                     </table>
@@ -151,7 +151,7 @@
                         <tr>
                             <td style="text-align: left; color: #444444; vertical-align: top;">DISKON</td>
                             <td style="text-align: right; vertical-align: top;">Rp</td>
-                            <td style="text-align: right; font-weight: bold; vertical-align: top;">{{ number_format($transaksi->diskon ?? 0, 0, ',', '.') }}</td>
+                            <td style="text-align: right; font-weight: bold; width: 45%; vertical-align: top;">{{ number_format($transaksi->diskon ?? 0, 0, ',', '.') }}</td>
                         </tr>
                         <tr style="font-weight: bold;">
                             <td style="text-align: left; border-top: 1px solid #000000; padding-top: 2px; vertical-align: top;">GRANDTOTAL</td>
@@ -192,7 +192,7 @@
                         </tr>
                         <tr>
                             <td style="vertical-align: top;">2.</td>
-                            <td style="vertical-align: top;">Kami tidak bertanggung jawab jika terdapat kesalahan dalam hasil cetak, apabila konsumen sudah menyetujui dan menyatakan OK untuk hasil settingannya.</td>
+                            <td style="vertical-align: top;">Kami tidak bertanggung jawab jika terdapat kesalahan dalam hasil cetak, apabila konsumen sudah menyetujui and menyatakan OK untuk hasil settingannya.</td>
                         </tr>
                         <tr>
                             <td style="vertical-align: top;">3.</td>

@@ -124,7 +124,7 @@
                                         <option value="">Pilih Pelanggan</option>
                                         @foreach($pelanggans as $pl)
                                         <option value="{{ $pl->id_pelanggan }}" data-telpon="{{ $pl->no_telpon ?? '-' }}" data-alamat="{{ $pl->alamat ?? '-' }}">
-                                            {{ $pl->username }}
+                                            {{ $pl->nama_pelanggan }}
                                         </option>
                                         @endforeach
                                     </select>
@@ -213,12 +213,14 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
+    // Global State
     let cart = [];
     let subtotal = 0;
     let currentFile = null;
     let currentFileName = '';
     let currentProduk = null;
 
+    // SweetAlert2 Buttons Styling
     const swalWithBootstrapButtons = Swal.mixin({
         customClass: {
             confirmButton: "bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded ml-2 text-xs uppercase tracking-wider",
@@ -227,16 +229,19 @@
         buttonsStyling: false
     });
 
+    // Sync Hidden Status Input
     document.getElementById('statusSelect').addEventListener('change', function() {
         document.getElementById('statusPesananInput').value = this.value;
     });
 
+    // Validasi format ukuran custom (PxL atau x)
     function isCustomSize(ukuran) {
         if (!ukuran) return false;
         let ukuranLower = ukuran.toLowerCase();
         return ukuranLower.includes('x') || ukuranLower.includes('pxl');
     }
 
+    // Reset Form Input Item ke Default
     function resetInputForm() {
         document.getElementById('produkSelect').value = '';
         if (document.getElementById('panjangInput')) document.getElementById('panjangInput').value = '';
@@ -257,6 +262,7 @@
         resetInputForm();
     };
 
+    // Toggle view input ukuran berdasarkan produk terpilih
     function updateUkuranForm() {
         let select = document.getElementById('produkSelect');
         let selectedOption = select.options[select.selectedIndex];
@@ -303,6 +309,7 @@
         }
     }
     
+    // Kalkulasi harga per unit (Rumus: Harga x P x L)
     function hitungHargaCustom() {
         if (!currentProduk) return 0;
         let panjang = parseFloat(document.getElementById('panjangInput').value) || 0;
@@ -312,12 +319,14 @@
         return totalHarga;
     }
     
+    // Event listeners untuk form input produk & ukuran
     document.getElementById('produkSelect').addEventListener('change', updateUkuranForm);
     if (document.getElementById('panjangInput')) {
         document.getElementById('panjangInput').addEventListener('input', hitungHargaCustom);
         document.getElementById('lebarInput').addEventListener('input', hitungHargaCustom);
     }
     
+    // Handler input file cetakan/desain
     document.getElementById('desainInput').onchange = (e) => {
         if (e.target.files.length) {
             currentFile = e.target.files[0];
@@ -330,6 +339,7 @@
         }
     };
     
+    // Autofill detail data pelanggan saat di-select
     document.getElementById('pelangganSelect').onchange = function() {
         let selectedOption = this.options[this.selectedIndex];
         let telpon = selectedOption.getAttribute('data-telpon') || '-';
@@ -339,6 +349,7 @@
         document.getElementById('alamatPelanggan').value = alamat;
     };
     
+    // Tambah item ke dalam array temporary (Cart)
     document.getElementById('tambahItemBtn').onclick = async function() {
         if (!currentProduk) {
             alert('Pilih produk terlebih dahulu');
@@ -368,6 +379,7 @@
         
         let qty = parseInt(document.getElementById('qtyInput').value) || 1;
         
+        // Konversi file attachment ke format Base64 string
         let fileBase64 = null;
         if (currentFile) {
             fileBase64 = await new Promise((resolve) => {
@@ -392,6 +404,7 @@
         resetInputForm();
     };
     
+    // Render elemen HTML tabel keranjang & re-kalkulasi subtotal
     function updateCartDisplay() {
         let html = '';
         let total = 0;
@@ -442,6 +455,7 @@
         hitungTotalTagihan();
     }
     
+    // Update kuantitas item langsung dari tabel keranjang
     window.updateQty = function(idx, val) {
         let qty = parseInt(val);
         if (!isNaN(qty) && qty > 0) {
@@ -450,6 +464,7 @@
         }
     };
     
+    // Hapus baris item tertentu dari keranjang dengan alert
     window.hapusItem = function(idx, nama) {
         swalWithBootstrapButtons.fire({
             title: "Apakah Anda yakin?",
@@ -475,6 +490,7 @@
         });
     };
     
+    // Hitung akhir nominal tagihan setelah dikurangi nilai diskon keuangan
     function hitungTotalTagihan() {
         let diskon = parseInt(document.getElementById('diskonInput').value) || 0;
         let totalTagihan = subtotal - diskon;
@@ -493,6 +509,7 @@
     
     document.getElementById('diskonInput').addEventListener('input', hitungTotalTagihan);
     
+    // Intercept submit form: Parsing data state array JS ke string JSON format sebelum di-post ke PHP
     document.getElementById('transaksiForm').addEventListener('submit', function(e) {
         if (cart.length === 0) {
             e.preventDefault();

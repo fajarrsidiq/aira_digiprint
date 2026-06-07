@@ -62,6 +62,18 @@ class TransaksiController extends Controller
             'bukti_bayar' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'tanggal_transaksi' => 'nullable|date',
             'status_pesanan' => 'nullable|string',
+        ], [
+            'cart.required' => 'Kolom Produk belanjaan wajib diisi.',
+            'id_pelanggan.required' => 'Kolom Nama Pelanggan wajib diisi.',
+            'id_pelanggan.exists' => 'Nama Pelanggan yang dipilih tidak valid.',
+            'id_pembayaran.required' => 'Kolom Opsi Metode Pembayaran wajib diisi.',
+            'id_pembayaran.exists' => 'Metode pembayaran yang dipilih tidak valid.',
+            'jumlah_bayar.required' => 'Kolom Jumlah Bayar wajib diisi.',
+            'jumlah_bayar.numeric' => 'Nilai jumlah bayar harus berupa angka.',
+            'jumlah_bayar.min' => 'Jumlah bayar tidak boleh kurang dari 0.',
+            'bukti_bayar.image' => 'Bukti pembayaran harus berupa gambar.',
+            'bukti_bayar.mimes' => 'Format gambar bukti pembayaran harus jpeg, png, atau jpg.',
+            'bukti_bayar.max' => 'Ukuran gambar bukti pembayaran maksimal 2 MB.',
         ]);
 
         DB::beginTransaction();
@@ -254,6 +266,15 @@ class TransaksiController extends Controller
             'bayar_pelunasan' => 'required|numeric|min:1',
             'id_pembayaran' => 'required|exists:jenis_pembayaran,id_jenis_pembayaran',
             'bukti_bayar' => 'nullable|file|mimes:jpeg,png,jpg,pdf|max:3072',
+        ], [
+            'bayar_pelunasan.required' => 'Kolom Bayar Pelunasan wajib diisi.',
+            'bayar_pelunasan.numeric' => 'Nilai pelunasan harus berupa angka.',
+            'bayar_pelunasan.min' => 'Jumlah pelunasan minimal Rp 1.',
+            'id_pembayaran.required' => 'Kolom Opsi Metode Pembayaran wajib diisi.',
+            'id_pembayaran.exists' => 'Metode pembayaran yang dipilih tidak valid.',
+            'bukti_bayar.file' => 'Bukti pembayaran pelunasan harus berupa file berkas.',
+            'bukti_bayar.mimes' => 'Format file bukti pelunasan harus berupa jpeg, png, jpg, atau pdf.',
+            'bukti_bayar.max' => 'Ukuran file bukti pelunasan maksimal 3 MB.',
         ]);
 
         $transaksi = Transaksi::findOrFail($id);

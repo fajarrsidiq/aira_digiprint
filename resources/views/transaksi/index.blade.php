@@ -4,7 +4,7 @@
 <div class="bg-white p-6 rounded shadow">
     <div class="flex justify-between mb-4">
         <h2 class="text-xl font-bold">Daftar Transaksi</h2>
-        <a href="{{ route('transaksi.create') }}" class="bg-green-600 text-white px-4 py-2 rounded">+ Tambah Transaksi</a>
+        <a href="{{ route('transaksi.create') }}" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">+ Tambah Transaksi</a>
     </div>
     
     <div class="overflow-x-auto">
@@ -33,7 +33,8 @@
                 <tr class="hover:bg-gray-50 align-middle">
                     <td class="border p-2 text-sm">{{ $transaksis->firstItem() + $index }}</td>
                     <td class="border p-2 text-sm font-mono text-blue-600 font-semibold">{{ $trx->no_invoice }}</td>
-                    <td class="border p-2 text-sm">{{ $trx->pelanggan->username ?? '-' }}</td>
+                    {{-- Tetap memanggil nama lengkap pelanggan --}}
+                    <td class="border p-2 text-sm font-medium text-gray-900">{{ $trx->pelanggan->nama_pelanggan ?? '-' }}</td>
                     <td class="border p-2 text-sm">{{ $trx->tanggal ? $trx->tanggal->format('d/m/Y H:i') : '-' }}</td>
                     <td class="border p-2 text-sm text-right">Rp {{ number_format($trx->total_tagihan, 0, ',', '.') }}</td>
                     <td class="border p-2 text-sm text-right">Rp {{ number_format($trx->jumlah_bayar, 0, ',', '.') }}</td>
@@ -42,7 +43,7 @@
                         {{ $kurangBayar > 0 ? 'Rp '.number_format($kurangBayar, 0, ',', '.') : 'Lunas' }}
                     </td>
                     
-                    {{-- Kolom Berkas Desain (Hanya Tulisan Lihat & Unduh) --}}
+                    {{-- Kolom Berkas Desain --}}
                     <td class="border p-2 text-xs text-center">
                         @php $desainFile = $trx->details->first()->upload_desain ?? null; @endphp
                         @if($desainFile)
@@ -55,7 +56,7 @@
                         @endif
                     </td>
 
-                    {{-- Kolom Bukti Pembayaran (Hanya Tulisan Lihat & Unduh) --}}
+                    {{-- Kolom Bukti Pembayaran --}}
                     <td class="border p-2 text-xs text-center">
                         @if($trx->bukti_bayar)
                             <div class="flex flex-col gap-1 items-center">
@@ -77,16 +78,19 @@
                         </span>
                     </td>
                     
-                    {{-- Dropdown Aksi (Hanya Invoice dan Lunasi) --}}
-                    <td class="border p-2 text-sm text-center relative" x-data="{ open: false }">
-                        <div class="inline-block text-left">
-                            <button @click="open = !open" @click.away="open = false" class="bg-gray-100 hover:bg-gray-200 border text-gray-700 px-2 py-1 rounded inline-flex items-center gap-1 text-xs focus:outline-none">
+                    {{-- Dropdown Aksi dengan Perbaikan Event Scope Alpine.js --}}
+                    <td class="border p-2 text-sm text-center" x-data="{ open: false }">
+                        <div class="inline-block text-left relative">
+                            {{-- Button hanya menangani trigger klik --}}
+                            <button @click="open = !open" class="bg-gray-100 hover:bg-gray-200 border text-gray-700 px-2 py-1 rounded inline-flex items-center gap-1 text-xs focus:outline-none">
                                 Aksi <span class="text-[10px]">▼</span>
                             </button>
-                            <div x-show="open" class="origin-top-right absolute right-0 mt-2 w-32 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50 flex flex-col p-1 text-left" style="display: none;">
+                            
+                            {{-- PERBAIKAN: @click.away dipindah ke pembungkus dropdown utama --}}
+                            <div x-show="open" @click.away="open = false" class="origin-top-right absolute right-0 mt-2 w-32 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50 flex flex-col p-1 text-left" style="display: none;">
                                 <a href="{{ route('transaksi.invoice', $trx->id_transaksi) }}" class="px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-100 rounded flex items-center gap-2">🖨️ Invoice</a>
                                 
-                                {{-- Tombol Lunasi hanya muncul jika masih ada kekurangan bayar --}}
+                                {{-- Tombol Lunasi muncul jika status piutang belum terpenuhi --}}
                                 @if($kurangBayar > 0)
                                     <a href="{{ route('transaksi.pelunasan', $trx->id_transaksi) }}" class="px-3 py-1.5 text-xs text-blue-600 hover:bg-blue-50 font-medium rounded flex items-center gap-2">✔ Lunasi</a>
                                 @endif
@@ -103,7 +107,9 @@
         </table>
     </div>
     
-    <div class="mt-4">{{ $transaksis->links() }}</div>
+    <div class="mt-4">
+        {{ $transaksis->appends(request()->query())->links() }}
+    </div>
 </div>
 
 {{-- Script Pendukung Dropdown Alpine JS --}}

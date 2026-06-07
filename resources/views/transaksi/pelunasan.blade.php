@@ -15,7 +15,7 @@
                 <div class="grid grid-cols-3"><span class="text-gray-500">Tanggal</span><span class="col-span-2">: {{ $transaksi->tanggal ? \Carbon\Carbon::parse($transaksi->tanggal)->format('d F Y') : ($transaksi->tanggal_transaksi ? \Carbon\Carbon::parse($transaksi->tanggal_transaksi)->format('d F Y') : '-') }}</span></div>
             </div>
             <div class="space-y-2.5">
-                <div class="grid grid-cols-3"><span class="text-gray-500">Pelanggan</span><span class="col-span-2 font-bold text-gray-900">: {{ $transaksi->pelanggan->username ?? '-' }}</span></div>
+                <div class="grid grid-cols-3"><span class="text-gray-500">Pelanggan</span><span class="col-span-2 font-bold text-gray-900">: {{ $transaksi->pelanggan->nama_pelanggan ?? '-' }}</span></div>
                 <div class="grid grid-cols-3"><span class="text-gray-500">No Telp</span><span class="col-span-2">: {{ $transaksi->pelanggan->no_telpon ?? $transaksi->pelanggan->no_telp ?? '-' }}</span></div>
                 <div class="grid grid-cols-3"><span class="text-gray-500">Alamat</span><span class="col-span-2">: {{ $transaksi->pelanggan->alamat ?? '-' }}</span></div>
             </div>
@@ -111,7 +111,7 @@
                     <div>
                         <label class="block text-xs font-semibold text-gray-600 uppercase mb-1">Tgl Pelunasan</label>
                         <input type="date" name="tanggal_pelunasan" value="{{ date('Y-m-d') }}" class="w-full border p-2 rounded focus:ring bg-white text-gray-800" required>
-                        <p class="text-[11px] text-blue-500 italic mt-1">Tanggal Pelunasan tidak boleh mundur dan hanya boleh maju 2 hari.</p>
+                        <p class="text-[11px] text-blue-500 italic mt-1">Tanggal Pelunasan tidak boleh mundur dan hanya boleh maju 2 days.</p>
                     </div>
                 </div>
 
