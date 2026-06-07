@@ -14,7 +14,7 @@ class ProdukController extends Controller
     {
         $search = $request->get('search');
 
-        $produks = Produk::withTrashed()->with(['bahan', 'satuan'])
+        $produks = Produk::with(['bahan', 'satuan'])
             ->when($search, function ($query, $search) {
                 return $query->where('nama_produk', 'like', '%' . $search . '%');
             })
@@ -40,6 +40,36 @@ class ProdukController extends Controller
             'ukuran_default' => 'nullable|string|max:50',
             'harga' => 'required|numeric|min:0',
             'foto_produk' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        ], [
+            'id_bahan.required'    => 'Silakan pilih bahan terlebih dahulu.',
+            'id_bahan.exists'      => 'Bahan yang dipilih tidak valid.',
+            'id_satuan.required'   => 'Silakan pilih satuan terlebih dahulu.',
+            'id_satuan.exists'     => 'Satuan yang dipilih tidak valid.',
+            'nama_produk.required' => 'Kolom Nama Produk wajib diisi.',
+            'nama_produk.string'   => 'Nama produk harus berupa teks.',
+            'nama_produk.max'      => 'Nama produk maksimal terdiri dari 100 karakter.',
+            'ukuran_default.max'   => 'Ukuran default maksimal terdiri dari 50 karakter.',
+            'harga.required'       => 'Kolom Harga wajib diisi.',
+            'harga.numeric'        => 'Harga harus berupa angka tanpa titik atau koma.',
+            'harga.min'            => 'Harga produk tidak boleh minus.',
+            'foto_produk.image'    => 'File yang diunggah harus berupa gambar.',
+            'foto_produk.mimes'    => 'Format foto harus berupa jpeg, png, atau jpg.',
+            'foto_produk.max'      => 'Ukuran foto maksimal adalah 2 MB.',
+        ], [
+            'id_bahan.required'    => 'Silakan pilih bahan terlebih dahulu.',
+            'id_bahan.exists'      => 'Bahan yang dipilih tidak valid.',
+            'id_satuan.required'   => 'Silakan pilih satuan terlebih dahulu.',
+            'id_satuan.exists'     => 'Satuan yang dipilih tidak valid.',
+            'nama_produk.required' => 'Kolom Nama Produk wajib diisi.',
+            'nama_produk.string'   => 'Nama produk harus berupa teks.',
+            'nama_produk.max'      => 'Nama produk maksimal terdiri dari 100 karakter.',
+            'ukuran_default.max'   => 'Ukuran default maksimal terdiri dari 50 karakter.',
+            'harga.required'       => 'Kolom Harga wajib diisi.',
+            'harga.numeric'        => 'Harga harus berupa angka tanpa titik atau koma.',
+            'harga.min'            => 'Harga produk tidak boleh minus.',
+            'foto_produk.image'    => 'File yang diunggah harus berupa gambar.',
+            'foto_produk.mimes'    => 'Format foto harus berupa jpeg, png, atau jpg.',
+            'foto_produk.max'      => 'Ukuran foto maksimal adalah 2 MB.',
         ]);
 
         $data = $request->except('foto_produk');
@@ -88,6 +118,7 @@ class ProdukController extends Controller
         if ($produk->foto_produk) {
             Storage::disk('public')->delete($produk->foto_produk);
         }
+        
         $produk->delete();
         return redirect()->route('produk.index')->with('success', 'Produk berhasil dihapus.');
     }

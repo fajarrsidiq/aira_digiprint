@@ -60,7 +60,7 @@ class BahanController extends Controller
 
     public function destroy(Bahan $bahan)
     {
-        if ($bahan->produks()->withTrashed()->exists()) {
+        if ($bahan->produks()->exists()) {
             return redirect()->route('bahan.index')
                 ->with('error', 'Bahan "' . $bahan->nama_bahan . '" tidak bisa dihapus karena masih digunakan oleh produk!');
         }

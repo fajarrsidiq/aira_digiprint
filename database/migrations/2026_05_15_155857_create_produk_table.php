@@ -20,7 +20,6 @@ return new class extends Migration
             $table->decimal('harga', 12, 2);
             $table->string('foto_produk')->nullable();
             $table->timestamps();
-            $table->softDeletes();
             
             $table->foreign('id_bahan')->references('id_bahan')->on('m_bahan')->onDelete('restrict')->onUpdate('cascade');
             $table->foreign('id_satuan')->references('id_satuan')->on('m_satuan')->onDelete('restrict')->onUpdate('cascade');
