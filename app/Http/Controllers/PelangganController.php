@@ -38,8 +38,6 @@ class PelangganController extends Controller
             'nama_pelanggan.required' => 'Kolom Nama Lengkap wajib diisi.',
             'username.required' => 'Kolom Username wajib diisi.',
             'username.unique' => 'Username sudah terdaftar, silakan gunakan username yang lain.',
-            'alamat.required' => 'Kolom Alamat wajib diisi.',
-            'no_telpon.required' => 'Kolom No. Telepon wajib diisi.',
             'no_telpon.max' => 'No. Telepon maksimal terdiri dari 15 karakter.',
         ]);
 
@@ -74,8 +72,6 @@ class PelangganController extends Controller
             'nama_pelanggan.required' => 'Kolom Nama Lengkap wajib diisi.',
             'username.required' => 'Kolom Username wajib diisi.',
             'username.unique' => 'Username sudah terdaftar, silakan gunakan username yang lain.',
-            'alamat.required' => 'Kolom Alamat wajib diisi.',
-            'no_telpon.required' => 'Kolom No. Telepon wajib diisi.',
             'no_telpon.max' => 'No. Telepon maksimal terdiri dari 15 karakter.',
         ]);
 
