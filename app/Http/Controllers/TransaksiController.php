@@ -27,8 +27,11 @@ class TransaksiController extends Controller
     public function create()
     {
         $pelanggans = Pelanggan::all();
+        $pelanggans = Pelanggan::all();
         $pembayarans = JenisPembayaran::all();
         $produks = Produk::all();
+
+        $desainers = Petugas::where('level', 'Desain')->get();
 
         // MEMBUAT INVOICE OTOMATIS AMAN (Maksimal 15 Karakter: INV-300526-0001)
         $hariIni = date('dmy'); 
@@ -47,7 +50,7 @@ class TransaksiController extends Controller
 
         $invoiceOtomatis = $prefix . $nomorUrutBaru;
 
-        return view('transaksi.create', compact('pelanggans', 'pembayarans', 'produks', 'invoiceOtomatis'));
+        return view('transaksi.create', compact('pelanggans', 'pembayarans', 'produks', 'desainers', 'invoiceOtomatis'));
     }
 
     public function store(Request $request)
@@ -60,7 +63,9 @@ class TransaksiController extends Controller
             'id_pembayaran' => 'required|exists:jenis_pembayaran,id_jenis_pembayaran',
             'jumlah_bayar' => 'required|numeric|min:0',
             'bukti_bayar' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-            'tanggal_transaksi' => 'nullable|date',
+            'id_desainer' => 'nullable|exists:petugas,id_petugas',
+            'catatan' => 'nullable|string',
+            'tanggal' => 'nullable|date',
             'status_pesanan' => 'nullable|string',
         ], [
             'cart.required' => 'Kolom Produk belanjaan wajib diisi.',
@@ -158,25 +163,29 @@ class TransaksiController extends Controller
             $petugas = Auth::guard('petugas')->user();
 
             $transaksi = Transaksi::create([
-                'no_invoice' => $noInvoice,
-                'id_pelanggan' => $request->id_pelanggan,
-                'id_petugas' => $petugas?->id_petugas ?? 1,
-                'id_pembayaran' => $request->id_pembayaran,
-                'tanggal' => $request->tanggal_transaksi ?? now(),
-                'total_tagihan' => $totalSetelahDiskon,
-                'jumlah_bayar' => $request->jumlah_bayar,
-                'bukti_bayar' => $buktiBayar,
-                'status_pesanan' => $statusPesanan,
+                'no_invoice'      => $noInvoice,
+                'id_pelanggan'    => $request->id_pelanggan,
+                'id_petugas'      => $petugas?->id_petugas ?? 1,
+                'id_desainer'     => $request->id_desainer,
+                'id_pembayaran'   => $request->id_pembayaran,
+                'tanggal'         => $request->tanggal ?? now(),
+                'total_tagihan'   => $totalSetelahDiskon,
+                'jumlah_bayar'    => $request->jumlah_bayar,
+                'diskon'          => $diskon,
+                'bukti_bayar'     => $buktiBayar,
+                'catatan'         => $request->catatan,
+                'status_pesanan'  => $statusPesanan,
             ]);
             
             foreach ($cartData as $detail) {
                 DetailTransaksi::create([
-                    'id_transaksi' => $transaksi->id_transaksi,
-                    'id_produk' => $detail['id_produk'],
-                    'keterangan_ukuran' => $detail['ukuran'],
-                    'upload_desain' => $detail['upload_desain'],
-                    'qty' => $detail['qty'],
-                    'subtotal' => $detail['subtotal'],
+                    'id_transaksi'       => $transaksi->id_transaksi,
+                    'id_produk'          => $detail['id_produk'],
+                    'keterangan_ukuran'  => $detail['ukuran'],
+                    'file_desain'        => $detail['upload_desain'],
+                    'harga'              => $detail['harga_satuan'],
+                    'qty'                => $detail['qty'],
+                    'subtotal'           => $detail['subtotal'],
                 ]);
             }
             
@@ -227,8 +236,8 @@ class TransaksiController extends Controller
         }
         
         foreach ($transaksi->details as $detail) {
-            if ($detail->upload_desain) {
-                Storage::disk('public')->delete($detail->upload_desain);
+            if ($detail->file_desain) {
+                Storage::disk('public')->delete($detail->file_desain);
             }
         }
         
@@ -298,7 +307,7 @@ class TransaksiController extends Controller
     public function downloadDesain($id)
     {
         $transaksi = Transaksi::with('details')->findOrFail($id);
-        $fileDesain = $transaksi->details->first()->upload_desain ?? null;
+        $fileDesain = $transaksi->details->first()->file_desain ?? null;
 
         if (!$fileDesain || !Storage::disk('public')->exists($fileDesain)) {
             return back()->with('error', 'Berkas dokumen desain tidak ditemukan dalam sistem penyimpanan.');

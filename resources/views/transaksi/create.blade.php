@@ -143,15 +143,23 @@
                                 </div>
                             </div>
                             <div class="grid grid-cols-3 items-center gap-2">
-                                <label class="text-xs font-semibold text-gray-600">Diskon</label>
+                                <label class="text-xs font-semibold text-gray-600">Pilih Desainer<span class="text-red-500">*</span></label>
                                 <div class="col-span-2">
-                                    <input type="number" name="diskon" id="diskonInput" class="w-full text-sm px-3 py-1.5 bg-white border border-gray-300 rounded text-gray-700 focus:outline-none focus:border-blue-500" value="0" min="0">
+                                    <select name="id_desainer"
+                                        class="w-full text-sm px-3 py-1.5 bg-white border border-gray-300 rounded text-gray-700 focus:outline-none focus:border-blue-500">
+                                        <option value="">-- Pilih Desainer --</option>
+                                        @foreach($desainers as $desainer)
+                                            <option value="{{ $desainer->id_petugas }}">
+                                                {{ $desainer->nama_lengkap }}
+                                            </option>
+                                        @endforeach
+                                    </select>
                                 </div>
                             </div>
-                            <div class="grid grid-cols-3 items-center gap-2">
-                                <label class="text-xs font-semibold text-gray-600">Tanggal</label>
+                            <div class="grid grid-cols-3 items-start gap-2">
+                                <label class="text-xs font-semibold text-gray-600 pt-1">Catatan</label>
                                 <div class="col-span-2">
-                                    <input type="date" name="tanggal_transaksi" class="w-full text-sm px-3 py-1.5 bg-white border border-gray-300 rounded text-gray-700 focus:outline-none focus:border-blue-500" value="{{ date('Y-m-d') }}">
+                                    <textarea name="catatan" rows="3" class="w-full text-sm px-3 py-1.5 bg-white border border-gray-300 rounded text-gray-700 focus:outline-none focus:border-blue-500"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -178,6 +186,18 @@
                                 <label class="text-xs font-semibold text-gray-600">Jumlah Bayar<span class="text-red-500">*</span></label>
                                 <div class="col-span-2">
                                     <input type="number" name="jumlah_bayar" id="jumlahBayarInput" class="w-full text-sm px-3 py-1.5 bg-white border border-gray-300 rounded text-gray-700 focus:outline-none focus:border-blue-500" step="0.01" required>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-3 items-center gap-2">
+                                <label class="text-xs font-semibold text-gray-600">Diskon</label>
+                                <div class="col-span-2">
+                                    <input type="number" name="diskon" id="diskonInput" class="w-full text-sm px-3 py-1.5 bg-white border border-gray-300 rounded text-gray-700 focus:outline-none focus:border-blue-500" value="0" min="0">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-3 items-center gap-2">
+                                <label class="text-xs font-semibold text-gray-600">Tanggal</label>
+                                <div class="col-span-2">
+                                    <input type="date" name="tanggal" class="w-full text-sm px-3 py-1.5 bg-white border border-gray-300 rounded text-gray-700 focus:outline-none focus:border-blue-500" value="{{ date('Y-m-d') }}">
                                 </div>
                             </div>
                             <div class="grid grid-cols-3 items-center gap-2">
@@ -522,9 +542,10 @@
             produk_id: item.produk_id,
             qty: item.qty,
             ukuran: item.ukuran,
-            upload_desain_base64: item.file_base64,
-            upload_desain_name: item.file_name,
-            upload_desain_type: item.file_type
+            
+            file_desain_base64: item.file_base64,
+            file_desain_name: item.file_name,
+            file_desain_type: item.file_type
         })));
     });
 </script>

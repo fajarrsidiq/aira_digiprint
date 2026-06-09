@@ -16,16 +16,20 @@ return new class extends Migration
             $table->string('no_invoice', 30)->unique();
             $table->unsignedBigInteger('id_pelanggan');
             $table->unsignedBigInteger('id_petugas')->nullable();
+            $table->unsignedBigInteger('id_desainer')->nullable();
             $table->unsignedBigInteger('id_pembayaran');
             $table->datetime('tanggal');
             $table->decimal('total_tagihan', 12, 2);
             $table->decimal('jumlah_bayar', 12, 2);
+            $table->decimal('diskon', 12, 2)->default(0);
             $table->string('bukti_bayar')->nullable();
+            $table->text('catatan')->nullable();
             $table->enum('status_pesanan', ['Menunggu Konfirmasi', 'Dikerjakan', 'Selesai', 'Dibatalkan'])->default('Menunggu Konfirmasi');
             $table->timestamps();
 
             $table->foreign('id_pelanggan')->references('id_pelanggan')->on('pelanggan')->onDelete('restrict')->onUpdate('cascade');
             $table->foreign('id_petugas')->references('id_petugas')->on('petugas')->onDelete('set null')->onUpdate('cascade');
+            $table->foreign('id_desainer')->references('id_petugas')->on('petugas')->onDelete('set null')->onUpdate('cascade');
             $table->foreign('id_pembayaran')->references('id_jenis_pembayaran')->on('jenis_pembayaran')->onDelete('restrict')->onUpdate('cascade');
         });
     }

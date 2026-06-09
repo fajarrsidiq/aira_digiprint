@@ -16,7 +16,8 @@ return new class extends Migration
             $table->unsignedBigInteger('id_transaksi');
             $table->unsignedBigInteger('id_produk');
             $table->string('keterangan_ukuran', 100)->nullable();
-            $table->string('upload_desain')->nullable();
+            $table->string('file_desain')->nullable();
+            $table->decimal('harga', 12, 2);
             $table->integer('qty');
             $table->decimal('subtotal', 12, 2);
             $table->timestamps();

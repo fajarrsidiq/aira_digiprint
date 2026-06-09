@@ -9,8 +9,8 @@ class Transaksi extends Model
     protected $table = 'transaksi';
     protected $primaryKey = 'id_transaksi';  
     protected $fillable = [
-        'no_invoice', 'id_pelanggan', 'id_petugas', 'id_pembayaran',
-        'tanggal', 'total_tagihan', 'jumlah_bayar', 'bukti_bayar', 'status_pesanan'
+        'no_invoice', 'id_pelanggan', 'id_petugas', 'id_desainer', 'id_pembayaran', 'diskon',
+        'tanggal', 'total_tagihan', 'jumlah_bayar', 'bukti_bayar', 'status_pesanan', 'catatan'
     ];
 
     protected $casts = [
@@ -35,5 +35,10 @@ class Transaksi extends Model
     public function details()
     {
         return $this->hasMany(DetailTransaksi::class, 'id_transaksi', 'id_transaksi');
+    }
+
+    public function desainer() 
+    {
+        return $this->belongsTo(Petugas::class, 'id_desainer', 'id_petugas');
     }
 }
