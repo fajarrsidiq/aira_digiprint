@@ -18,9 +18,23 @@ use App\Models\Petugas;
 
 class TransaksiController extends Controller
 {
-    public function index()
+   public function index(Request $request)
     {
-        $transaksis = Transaksi::with(['pelanggan', 'petugas', 'pembayaran', 'details.produk'])->latest()->paginate(10);
+        // Mengambil nilai pencarian dari input 'search'
+        $search = $request->get('search');
+
+        // Membangun query dengan relasi yang dibutuhkan
+        $transaksis = Transaksi::with(['pelanggan', 'petugas', 'pembayaran', 'details.produk'])
+            ->when($search, function ($query, $search) {
+                // Logika pencarian: mencari berdasarkan nomor invoice ATAU nama pelanggan
+                return $query->where('no_invoice', 'like', '%' . $search . '%')
+                    ->orWhereHas('pelanggan', function ($q) use ($search) {
+                        $q->where('nama_pelanggan', 'like', '%' . $search . '%');
+                    });
+            })
+            ->latest()
+            ->paginate(10);
+
         return view('transaksi.index', compact('transaksis'));
     }
 
