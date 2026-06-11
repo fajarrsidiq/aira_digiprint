@@ -143,12 +143,12 @@ class TransaksiController extends Controller
                 $subtotal = $hargaSatuan * $item['qty'];
                 $totalTagihan += $subtotal;
                 
-                $uploadDesainPath = null;
-                if (!empty($item['upload_desain_base64']) && !empty($item['upload_desain_name'])) {
-                    $uploadDesainPath = $this->saveBase64File(
-                        $item['upload_desain_base64'],
-                        $item['upload_desain_name'],
-                        $item['upload_desain_type'] ?? 'image/jpeg'
+                $fileDesainPath = null;
+                if (!empty($item['file_desain_base64']) && !empty($item['file_desain_name'])) {
+                    $fileDesainPath = $this->saveBase64File(
+                        $item['file_desain_base64'],
+                        $item['file_desain_name'],
+                        $item['file_desain_type'] ?? 'image/jpeg'
                     );
                 }
                 
@@ -158,7 +158,7 @@ class TransaksiController extends Controller
                     'subtotal' => $subtotal,
                     'harga_satuan' => $hargaSatuan,
                     'ukuran' => $ukuran,
-                    'upload_desain' => $uploadDesainPath,
+                    'file_desain' => $fileDesainPath,
                 ];
             }
             
@@ -171,7 +171,7 @@ class TransaksiController extends Controller
                 $buktiBayar = $request->file('bukti_bayar')->store('bukti_pembayaran', 'public');
             }
             
-            $statusPesanan = $request->status_pesanan ?? 'Menunggu Konfirmasi';
+            $statusPesanan = $request->status_pesanan ?? 'Diproses';
             
             /** @var Petugas|null $petugas */
             $petugas = Auth::guard('petugas')->user();
@@ -188,7 +188,7 @@ class TransaksiController extends Controller
                 'diskon'          => $diskon,
                 'bukti_bayar'     => $buktiBayar,
                 'catatan'         => $request->catatan,
-                'status_pesanan'  => $statusPesanan,
+                'status_pesanan'  => 'Diproses',
             ]);
             
             foreach ($cartData as $detail) {
@@ -196,7 +196,7 @@ class TransaksiController extends Controller
                     'id_transaksi'       => $transaksi->id_transaksi,
                     'id_produk'          => $detail['id_produk'],
                     'keterangan_ukuran'  => $detail['ukuran'],
-                    'file_desain'        => $detail['upload_desain'],
+                    'file_desain'        => $detail['file_desain'],
                     'harga'              => $detail['harga_satuan'],
                     'qty'                => $detail['qty'],
                     'subtotal'           => $detail['subtotal'],
@@ -318,25 +318,24 @@ class TransaksiController extends Controller
     }
 
     //Menangani unduhan file desain item cetak dari storage link
-    public function downloadDesain($id)
+    public function downloadDesain($id_detail)
     {
-        $transaksi = Transaksi::with('details')->findOrFail($id);
-        $fileDesain = $transaksi->details->first()->file_desain ?? null;
+        // Cari detail transaksi berdasarkan ID spesifik dari tombol yang diklik
+        $detail = \App\Models\DetailTransaksi::findOrFail($id_detail);
 
-        if (!$fileDesain || !Storage::disk('public')->exists($fileDesain)) {
-            return back()->with('error', 'Berkas dokumen desain tidak ditemukan dalam sistem penyimpanan.');
+        // Cek apakah file benar-benar ada
+        if (!$detail->file_desain || !Storage::disk('public')->exists($detail->file_desain)) {
+            return back()->with('error', 'File tidak ditemukan.');
         }
 
-        /** @var FilesystemAdapter $storage */
-        $storage = Storage::disk('public');
-
-        return $storage->download($fileDesain);
+        return response()->download(storage_path('app/public/' . $detail->file_desain)
+);
     }
 
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|in:Menunggu Konfirmasi,Dikerjakan,Selesai,Dibatalkan'
+            'status' => 'required|in:Menunggu Konfirmasi,Diproses,Selesai'
         ]);
         
         $transaksi = Transaksi::findOrFail($id);

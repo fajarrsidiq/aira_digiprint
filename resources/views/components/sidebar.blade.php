@@ -56,8 +56,11 @@
             <a href="{{ route('dashboard.pelanggan') }}" class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all">
                 <i class="fas fa-tachometer-alt w-5"></i> Dashboard
             </a>
-            <a href="#" class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all">
-                <i class="fas fa-shopping-cart w-5"></i> Pesanan Saya
+            <a href="{{ route('pelanggan.pesanan') }}" class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all">
+                <i class="fas fa-shopping-cart w-5"></i> Input Pesanan
+            </a>
+            <a href="{{ route('pelanggan.riwayat') }}" class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all">
+                <i class="fas fa-receipt w-5"></i> Riwayat Transaksi
             </a>
         @endif
     </nav>

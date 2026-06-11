@@ -4,8 +4,18 @@
             <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-2 rounded-xl shadow-md"><i class="fas fa-print text-white text-xl"></i></div>
             <div><h1 class="text-xl font-bold bg-gradient-to-r from-blue-800 to-indigo-800 bg-clip-text text-transparent">AIRA Digiprint</h1><p class="text-xs text-gray-500 -mt-0.5">Solusi Percetakan Digital</p></div>
         </div>
+
         <div class="flex items-center gap-4">
             @auth
+                @if(Auth::guard('petugas')->check() && in_array(Auth::guard('petugas')->user()->level, ['Administrasi', 'Owner']))
+                    <a href="{{ route('notifikasi.index') }}" class="relative text-gray-500 hover:text-blue-600 transition p-2">
+                        <i class="fas fa-bell text-lg"></i>
+                        @if($notifCount > 0)
+                            <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white animate-pulse"></span>
+                        @endif
+                    </a>
+                @endif
+
                 <div class="relative" x-data="{ open: false }">
                     <button @click="open = !open" class="flex items-center gap-2 bg-gray-100 px-3 py-1.5 rounded-full hover:bg-gray-200 transition">
                         <i class="fas fa-user-circle text-blue-600 text-lg"></i>

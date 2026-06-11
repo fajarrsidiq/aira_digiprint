@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminNotifikasiController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\BahanController;
 use App\Http\Controllers\ProfileController;
@@ -7,6 +8,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\JenisPembayaranController;
 use App\Http\Controllers\PelangganController;
+use App\Http\Controllers\PelangganTransaksiController;
 use App\Http\Controllers\PetugasController;
 use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\SatuanController;
@@ -23,6 +25,12 @@ Route::middleware(['auth:petugas'])->get('/dashboard/petugas', [DashboardControl
 Route::middleware(['auth:pelanggan'])->get('/dashboard/pelanggan', function (){
     return view('pelanggan.dashboard', ['user' => auth()->guard('pelanggan')->user()]);
 })->name('dashboard.pelanggan');
+
+// Notifikasi
+Route::middleware(['auth:petugas', 'level:Owner,Administrasi'])->group(function () {
+    Route::get('/notifikasi', [AdminNotifikasiController::class, 'index'])->name('notifikasi.index');
+    Route::post('/notifikasi/proses/{id}', [AdminNotifikasiController::class, 'proses'])->name('admin.notifikasi.proses');
+});
 
 // Profile Pengguna
 Route::middleware(['any.guard'])->group(function () {
@@ -103,11 +111,20 @@ Route::middleware(['auth:petugas', 'level:Owner,Administrasi'])->prefix('transak
 
     // Alur penanganan berkas dan pencetakan invoice
     Route::get('/{id}/invoice', [TransaksiController::class, 'invoice'])->name('invoice');
-    Route::get('/{id}/download-desain', [TransaksiController::class, 'downloadDesain'])->name('download-desain');
+    // Ganti baris lama Anda dengan ini:
+    Route::get('/download-desain/{id_detail}', [TransaksiController::class, 'downloadDesain'])->name('download-desain');
     
     // Alur baru halaman pelunasan (Sudah otomatis bernama transaksi.pelunasan & transaksi.proses-pelunasan)
     Route::get('/{id}/pelunasan', [TransaksiController::class, 'halamanPelunasan'])->name('pelunasan');
     Route::put('/{id}/proses-pelunasan', [TransaksiController::class, 'prosesPelunasan'])->name('proses-pelunasan');
+});
+
+// Khusus Pelanggan
+Route::middleware('auth:pelanggan')->group(function () {
+    Route::get('/pesanan', [PelangganTransaksiController::class, 'index'])->name('pelanggan.pesanan');
+    Route::post('/pesanan', [PelangganTransaksiController::class, 'store'])->name('pelanggan.pesanan.store');
+    Route::get('/riwayat', [PelangganTransaksiController::class, 'riwayat'])->name('pelanggan.riwayat');
+    Route::get('/invoice/{id}', [PelangganTransaksiController::class, 'invoice'])->name('pelanggan.invoice');
 });
 
 require __DIR__.'/auth.php';

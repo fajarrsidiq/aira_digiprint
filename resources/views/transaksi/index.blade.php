@@ -67,11 +67,20 @@
                     </td>
                     
                     <td class="border p-2 text-xs text-center">
-                        @php $desainFile = $trx->details->first()->upload_desain ?? null; @endphp
-                        @if($desainFile)
-                            <div class="flex flex-col gap-1 items-center">
-                                <a href="{{ asset('storage/' . $desainFile) }}" target="_blank" class="text-blue-600 hover:underline">Lihat</a>
-                                <a href="{{ route('transaksi.download-desain', $trx->id_transaksi) }}" class="text-gray-600 hover:underline">Unduh</a>
+                        @if($trx->details->isNotEmpty())
+                            <div class="flex flex-col gap-2">
+                                @foreach($trx->details as $detail)
+                                    @if($detail->file_desain)
+                                        <div class="flex flex-col border-b border-gray-100 pb-1 mb-1 last:border-0 last:mb-0">
+                                            <span class="text-[10px] text-gray-500">{{ $detail->produk->nama_produk ?? 'Produk' }}</span>
+                                            <div class="flex gap-2 justify-center">
+                                                <a href="{{ asset('storage/' . $detail->file_desain) }}" target="_blank" class="text-blue-600 hover:underline">Lihat</a>
+                                                
+                                                <a href="{{ route('transaksi.download-desain', $detail->id_detail) }}" class="text-gray-600 hover:underline">Unduh</a>
+                                            </div>
+                                        </div>
+                                    @endif
+                                @endforeach
                             </div>
                         @else
                             <span class="text-gray-400 italic">-</span>

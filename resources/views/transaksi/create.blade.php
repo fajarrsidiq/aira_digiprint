@@ -5,10 +5,9 @@
     <form method="POST" action="{{ route('transaksi.store') }}" enctype="multipart/form-data" id="transaksiForm">
         @csrf
         <input type="hidden" name="cart" id="cartInput">
-        <input type="hidden" name="status_pesanan" id="statusPesananInput" value="Menunggu Konfirmasi">
 
         <div class="flex flex-col gap-6 w-full">
-            
+
             <div class="bg-white border border-gray-300 rounded-lg shadow-sm overflow-hidden w-full">
                 <div class="bg-gray-50 px-5 py-3 border-b border-gray-300">
                     <strong class="text-sm font-semibold text-gray-700 tracking-wider">INPUT PESANAN</strong>
@@ -207,14 +206,10 @@
                                 </div>
                             </div>
                             <div class="grid grid-cols-3 items-center gap-2">
-                                <label class="text-xs font-semibold text-gray-600">Status<span class="text-red-500">*</span></label>
+                                <label class="text-xs font-semibold text-gray-600">Status</label>
                                 <div class="col-span-2">
-                                    <select name="status_pesanan_select" id="statusSelect" class="w-full text-sm px-3 py-1.5 bg-white border border-gray-300 rounded text-gray-700 focus:outline-none focus:border-blue-500">
-                                        <option value="Menunggu Konfirmasi" selected>Menunggu Konfirmasi</option>
-                                        <option value="Dikerjakan">Dikerjakan</option>
-                                        <option value="Selesai">Selesai</option>
-                                        <option value="Dibatalkan">Dibatalkan</option>
-                                    </select>
+                                    <input type="text" name="status_pesanan" value="Diproses" readonly 
+                                        class="w-full text-sm px-3 py-1.5 bg-gray-200 border border-gray-300 rounded text-gray-800 font-bold focus:outline-none cursor-not-allowed">
                                 </div>
                             </div>
                         </div>
@@ -249,11 +244,6 @@
         buttonsStyling: false
     });
 
-    // Sync Hidden Status Input
-    document.getElementById('statusSelect').addEventListener('change', function() {
-        document.getElementById('statusPesananInput').value = this.value;
-    });
-
     // Validasi format ukuran custom (PxL atau x)
     function isCustomSize(ukuran) {
         if (!ukuran) return false;
@@ -286,59 +276,49 @@
     function updateUkuranForm() {
         let select = document.getElementById('produkSelect');
         let selectedOption = select.options[select.selectedIndex];
-        let ukuranDefault = selectedOption.dataset?.ukuran || '';
-        let hargaDasar = parseFloat(selectedOption.dataset?.harga) || 0;
-        let namaProduk = selectedOption.dataset?.nama || '';
         
-        let ukuranEmpty = document.getElementById('ukuranEmpty');
-        let ukuranFixed = document.getElementById('ukuranFixed');
-        let ukuranCustom = document.getElementById('ukuranCustom');
-        
-        if (!select.value) {
-            ukuranEmpty.style.display = 'block';
-            ukuranFixed.style.display = 'none';
-            ukuranCustom.style.display = 'none';
-            document.getElementById('hargaDisplay').value = 'Rp 0';
-            currentProduk = null;
-            return;
+        if (!select.value) { 
+            resetInputForm(); 
+            return; 
         }
-        
+
         currentProduk = {
             id: select.value,
-            nama: namaProduk,
-            ukuran_default: ukuranDefault,
-            harga_dasar: hargaDasar
+            nama: selectedOption.dataset.nama,
+            ukuran_default: selectedOption.dataset.ukuran,
+            harga_dasar: parseFloat(selectedOption.dataset.harga)
         };
+
+        // Tampilkan/Sembunyikan div ukuran
+        document.getElementById('ukuranEmpty').style.display = 'none';
         
-        if (isCustomSize(ukuranDefault)) {
-            ukuranEmpty.style.display = 'none';
-            ukuranFixed.style.display = 'none';
-            ukuranCustom.style.display = 'block';
-            hitungHargaCustom();
-        } else if (ukuranDefault) {
-            ukuranEmpty.style.display = 'none';
-            document.getElementById('ukuranFixedValue').value = ukuranDefault;
-            ukuranFixed.style.display = 'block';
-            ukuranCustom.style.display = 'none';
-            document.getElementById('hargaDisplay').value = 'Rp ' + hargaDasar.toLocaleString('id-ID');
+        if (isCustomSize(currentProduk.ukuran_default)) {
+            document.getElementById('ukuranCustom').style.display = 'block';
+            document.getElementById('ukuranFixed').style.display = 'none';
+            // Hitung harga awal jika user belum input panjang/lebar
+            document.getElementById('hargaDisplay').value = 'Rp ' + currentProduk.harga_dasar.toLocaleString('id-ID');
         } else {
-            ukuranEmpty.style.display = 'block';
-            ukuranFixed.style.display = 'none';
-            ukuranCustom.style.display = 'none';
-            document.getElementById('hargaDisplay').value = 'Rp 0';
+            document.getElementById('ukuranFixed').style.display = 'block';
+            document.getElementById('ukuranCustom').style.display = 'none';
+            document.getElementById('ukuranFixedValue').value = currentProduk.ukuran_default;
+            // Tampilkan harga dasar
+            document.getElementById('hargaDisplay').value = 'Rp ' + currentProduk.harga_dasar.toLocaleString('id-ID');
         }
     }
+
     
     // Kalkulasi harga per unit (Rumus: Harga x P x L)
     function hitungHargaCustom() {
-        if (!currentProduk) return 0;
+        if (!currentProduk) return;
         let panjang = parseFloat(document.getElementById('panjangInput').value) || 0;
         let lebar = parseFloat(document.getElementById('lebarInput').value) || 0;
-        let totalHarga = currentProduk.harga_dasar * panjang * lebar;
-        document.getElementById('hargaDisplay').value = totalHarga === 0 ? 'Rp 0' : 'Rp ' + totalHarga.toLocaleString('id-ID');
-        return totalHarga;
+        
+        // Jika tidak input panjang lebar, gunakan harga dasar
+        let totalHarga = (panjang > 0 && lebar > 0) ? (currentProduk.harga_dasar * panjang * lebar) : currentProduk.harga_dasar;
+        
+        document.getElementById('hargaDisplay').value = 'Rp ' + totalHarga.toLocaleString('id-ID');
     }
-    
+
     // Event listeners untuk form input produk & ukuran
     document.getElementById('produkSelect').addEventListener('change', updateUkuranForm);
     if (document.getElementById('panjangInput')) {
@@ -536,7 +516,6 @@
             alert('Minimal satu produk ditambahkan');
             return;
         }
-        document.getElementById('statusPesananInput').value = document.getElementById('statusSelect').value;
         
         document.getElementById('cartInput').value = JSON.stringify(cart.map(item => ({
             produk_id: item.produk_id,
