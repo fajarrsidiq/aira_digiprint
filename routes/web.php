@@ -107,7 +107,6 @@ Route::middleware(['auth:petugas', 'level:Owner,Administrasi'])->prefix('transak
     Route::post('/', [TransaksiController::class, 'store'])->name('store');
     Route::get('/{id}', [TransaksiController::class, 'show'])->name('show');
     Route::delete('/{id}', [TransaksiController::class, 'destroy'])->name('destroy');
-    Route::get('/invoice/{id}', [TransaksiController::class, 'invoice'])->name('invoice');
 
     // Alur penanganan berkas dan pencetakan invoice
     Route::get('/{id}/invoice', [TransaksiController::class, 'invoice'])->name('invoice');
