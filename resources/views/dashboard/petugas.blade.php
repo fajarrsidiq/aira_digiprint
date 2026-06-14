@@ -25,19 +25,34 @@
                 <div class="bg-green-50 px-5 py-2 text-xs text-green-600">Seluruh karyawan</div>
             </div>
             <div class="bg-white rounded-2xl shadow-md overflow-hidden">
-                <div class="p-5"><div class="flex justify-between"><div><p class="text-gray-500 text-sm">Total Transaksi</p><p class="text-3xl font-bold">{{ $totalTransaksi }}</p></div><div class="bg-yellow-100 rounded-full p-3"><i class="fas fa-receipt text-yellow-600 text-xl"></i></div></div></div>
-                <div class="bg-yellow-50 px-5 py-2 text-xs text-yellow-600">Sepanjang waktu</div>
+                <div class="p-5"><div class="flex justify-between"><div><p class="text-gray-500 text-sm">Total Produk</p><p class="text-3xl font-bold">{{ $totalProduk }}</p></div><div class="bg-purple-100 rounded-full p-3"><i class="fas fa-boxes text-purple-600 text-xl"></i></div></div></div>
+                <div class="bg-purple-50 px-5 py-2 text-xs text-purple-600">Produk tersedia</div>
             </div>
             <div class="bg-white rounded-2xl shadow-md overflow-hidden">
-                <div class="p-5"><div class="flex justify-between"><div><p class="text-gray-500 text-sm">Total Pendapatan</p><p class="text-3xl font-bold">Rp {{ number_format($totalPendapatan,0,',','.') }}</p></div><div class="bg-purple-100 rounded-full p-3"><i class="fas fa-chart-line text-purple-600 text-xl"></i></div></div></div>
-                <div class="bg-purple-50 px-5 py-2 text-xs text-purple-600">Total keseluruhan</div>
+                <div class="p-5"><div class="flex justify-between"><div><p class="text-gray-500 text-sm">Total Transaksi</p><p class="text-3xl font-bold">{{ $totalTransaksi }}</p></div><div class="bg-yellow-100 rounded-full p-3"><i class="fas fa-receipt text-yellow-600 text-xl"></i></div></div></div>
+                <div class="bg-yellow-50 px-5 py-2 text-xs text-yellow-600">Sepanjang waktu</div>
             </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            <div class="bg-white rounded-xl shadow p-4"><div class="flex justify-between"><div><p class="text-gray-400 text-sm">Total Produk</p><p class="text-2xl font-bold">{{ $totalProduk }}</p></div><i class="fas fa-boxes text-gray-400 text-2xl"></i></div><p class="text-xs text-blue-600 mt-2">Produk tersedia</p></div>
-            <div class="bg-white rounded-xl shadow p-4"><div class="flex justify-between"><div><p class="text-gray-400 text-sm">Total Bahan</p><p class="text-2xl font-bold">{{ $totalBahan }}</p></div><i class="fas fa-cubes text-gray-400 text-2xl"></i></div><p class="text-xs text-green-600 mt-2">Jenis bahan baku</p></div>
-            <div class="bg-white rounded-xl shadow p-4"><div class="flex justify-between"><div><p class="text-gray-400 text-sm">Total Satuan</p><p class="text-2xl font-bold">{{ $totalSatuan }}</p></div><i class="fas fa-balance-scale text-gray-400 text-2xl"></i></div><p class="text-xs text-purple-600 mt-2">Unit satuan</p></div>
+            <div class="bg-white rounded-2xl shadow-md p-5 border-l-4 border-blue-500">
+                <div class="flex justify-between items-center">
+                    <div><p class="text-gray-500 text-xs uppercase font-semibold">Total Omzet</p><p class="text-xl font-bold text-gray-800">Rp {{ number_format($totalPendapatan, 0, ',', '.') }}</p></div>
+                    <i class="fas fa-shopping-cart text-blue-500 text-xl opacity-50"></i>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl shadow-md p-5 border-l-4 border-green-500">
+                <div class="flex justify-between items-center">
+                    <div><p class="text-gray-500 text-xs uppercase font-semibold">Total Kas Masuk</p><p class="text-xl font-bold text-green-600">Rp {{ number_format($totalDiterima, 0, ',', '.') }}</p></div>
+                    <i class="fas fa-money-bill-wave text-green-500 text-xl opacity-50"></i>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl shadow-md p-5 border-l-4 border-red-500">
+                <div class="flex justify-between items-center">
+                    <div><p class="text-gray-500 text-xs uppercase font-semibold">Total Piutang</p><p class="text-xl font-bold text-red-600">Rp {{ number_format($totalPiutang, 0, ',', '.') }}</p></div>
+                    <i class="fas fa-hand-holding-usd text-red-500 text-xl opacity-50"></i>
+                </div>
+            </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -72,7 +87,6 @@
     @endif
 </div>
 
-@if(in_array($user->level, ['Administrasi', 'Owner']))
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
@@ -94,5 +108,4 @@
     });
 </script>
 @endpush
-@endif
 @endsection

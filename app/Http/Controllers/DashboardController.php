@@ -24,14 +24,24 @@ class DashboardController extends Controller
 
         if (in_array($user->level, ['Owner', 'Administrasi'])) {
             $data['totalPelanggan'] = Pelanggan::count();
-            $data['totalPetugas'] = Petugas::count();
+            $data['totalPetugas']   = Petugas::count();
             $data['totalTransaksi'] = Transaksi::count();
-            $data['totalPendapatan'] = Transaksi::sum('total_tagihan');
-            $data['totalProduk'] = Produk::count();
-            $data['totalBahan'] = Bahan::count();
-            $data['totalSatuan'] = Satuan::count();
             
-            $data['chartData'] = Transaksi::select(DB::raw('DATE(tanggal) as tanggal'), DB::raw('SUM(total_tagihan) as total'))
+            // Perhitungan Keuangan
+            $data['totalPendapatan'] = Transaksi::sum('total_tagihan');
+            $data['totalDiterima']   = Transaksi::sum('jumlah_bayar');
+            $data['totalPiutang']    = $data['totalPendapatan'] - $data['totalDiterima'];
+            
+            // Statistik Produk/Bahan (Tetap ada sebagai data pelengkap)
+            $data['totalProduk']  = Produk::count();
+            $data['totalBahan']   = Bahan::count();
+            $data['totalSatuan']  = Satuan::count();
+            
+            // Grafik 7 Hari Terakhir
+            $data['chartData'] = Transaksi::select(
+                    DB::raw('DATE(tanggal) as tanggal'), 
+                    DB::raw('SUM(total_tagihan) as total')
+                )
                 ->where('tanggal', '>=', now()->subDays(7))
                 ->groupBy('tanggal')
                 ->orderBy('tanggal')
