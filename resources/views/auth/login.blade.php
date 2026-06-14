@@ -19,17 +19,6 @@
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
 
-        <!-- Role (pilihan petugas atau pelanggan) -->
-        <div class="mt-4">
-            <x-input-label for="role" :value="__('Login Sebagai')" />
-            <select name="role" id="role" class="block mt-1 w-full rounded-md border-gray-300 shadow-sm">
-                <option value="" disabled selected>-- Pilih Role --</option>
-                <option value="petugas">Petugas</option>
-                <option value="pelanggan">Pelanggan</option>
-            </select>
-            <x-input-error :messages="$errors->get('role')" class="mt-2" />
-        </div>
-
         <!-- Button Login -->
         <div class="flex items-center justify-end mt-4">
             <x-primary-button class="ms-3">

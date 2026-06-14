@@ -87,25 +87,27 @@
     @endif
 </div>
 
-@push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    const ctx = document.getElementById('revenueChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: {!! json_encode($chartData->pluck('tanggal')->map(fn($d) => date('d/m', strtotime($d)))) !!},
-            datasets: [{
-                label: 'Pendapatan (Rp)',
-                data: {!! json_encode($chartData->pluck('total')) !!},
-                borderColor: '#3b82f6',
-                backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                tension: 0.4,
-                fill: true
-            }]
-        },
-        options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { callback: value => 'Rp ' + value.toLocaleString('id-ID') } } } }
-    });
-</script>
-@endpush
+@if($chartData->isNotEmpty())
+    @push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('revenueChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: {!! json_encode($chartData->pluck('tanggal')->map(fn($d) => date('d/m', strtotime($d)))) !!},
+                datasets: [{
+                    label: 'Pendapatan (Rp)',
+                    data: {!! json_encode($chartData->pluck('total')) !!},
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { callback: value => 'Rp ' + value.toLocaleString('id-ID') } } } }
+        });
+    </script>
+    @endpush
+@endif
 @endsection
