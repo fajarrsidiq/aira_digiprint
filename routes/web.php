@@ -119,6 +119,12 @@ Route::middleware(['auth:petugas', 'level:Owner,Administrasi'])->prefix('transak
     Route::put('/{id}/proses-pelunasan', [TransaksiController::class, 'prosesPelunasan'])->name('proses-pelunasan');
 });
 
+// Khusus Petugas (Laporan)
+Route::middleware(['auth:petugas', 'level:Owner'])->group(function () {
+    Route::get('/laporan', [App\Http\Controllers\LaporanController::class, 'index'])->name('laporan.index');
+    Route::get('/laporan/export', [App\Http\Controllers\LaporanController::class, 'export'])->name('laporan.export');
+});
+
 // Khusus Pelanggan
 Route::middleware('auth:pelanggan')->group(function () {
     Route::get('/pesanan', [PelangganTransaksiController::class, 'index'])->name('pelanggan.pesanan');
