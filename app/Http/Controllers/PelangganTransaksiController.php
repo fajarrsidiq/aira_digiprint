@@ -166,13 +166,11 @@ class PelangganTransaksiController extends Controller
     {
         $idPelanggan = Auth::guard('pelanggan')->user()->id_pelanggan;
 
-        // Ambil transaksi hanya milik pelanggan yang login
-        $transaksi = Transaksi::with(['pelanggan', 'pembayaran', 'details.produk'])
+        $transaksi = Transaksi::with(['pelanggan', 'pembayaran', 'details.produk', 'petugas'])
             ->where('id_transaksi', $id)
             ->where('id_pelanggan', $idPelanggan)
             ->firstOrFail();
 
-        // Sesuaikan path view di sini: 'pelanggan.invoice'
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pelanggan.invoice', compact('transaksi'));
         
         return $pdf->stream('invoice-' . $transaksi->no_invoice . '.pdf');

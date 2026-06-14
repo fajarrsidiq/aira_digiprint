@@ -266,10 +266,12 @@ class TransaksiController extends Controller
         $transaksi = Transaksi::with([
             'pelanggan', 
             'pembayaran', 
-            'details.produk' 
+            'details.produk',
+            'petugas'
         ])->findOrFail($id);
 
         $pdf = Pdf::loadView('transaksi.invoice', compact('transaksi'));
+        
         return $pdf->stream('invoice-' . $transaksi->no_invoice . '.pdf');
     }
 

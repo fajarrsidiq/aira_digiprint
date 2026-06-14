@@ -136,7 +136,7 @@
                         </tr>
                         <tr style="font-weight: bold; text-transform: uppercase;">
                             <td style="vertical-align: top;">( {{ $transaksi->pelanggan->nama_pelanggan ?? '...................' }} )</td>
-                            <td style="vertical-align: top;">( Admin )</td>
+                            <td style="vertical-align: top;">( {{ $transaksi->petugas->nama_lengkap ?? 'Admin' }} )</td>
                         </tr>
                     </table>
                 </td>
