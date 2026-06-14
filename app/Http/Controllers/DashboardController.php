@@ -16,26 +16,28 @@ class DashboardController extends Controller
     public function petugas()
     {
         $user = Auth::guard('petugas')->user();
-        $totalPelanggan = Pelanggan::count();
-        $totalPetugas = Petugas::count();
-        $totalTransaksi = Transaksi::count();
-        $totalPendapatan = Transaksi::sum('total_tagihan');
-        $totalProduk = Produk::count();
-        $totalBahan = Bahan::count();
-        $totalSatuan = Satuan::count();
+        
+        $data = [
+            'user' => $user,
+            'transaksiTerbaru' => Transaksi::with('pelanggan')->orderBy('tanggal', 'desc')->limit(5)->get()
+        ];
 
-        $chartData = Transaksi::select(DB::raw('DATE(tanggal) as tanggal'), DB::raw('SUM(total_tagihan) as total'))
-            ->where('tanggal', '>=', now()->subDays(7))
-            ->groupBy('tanggal')
-            ->orderBy('tanggal')
-            ->get();
+        if (in_array($user->level, ['Owner', 'Administrasi'])) {
+            $data['totalPelanggan'] = Pelanggan::count();
+            $data['totalPetugas'] = Petugas::count();
+            $data['totalTransaksi'] = Transaksi::count();
+            $data['totalPendapatan'] = Transaksi::sum('total_tagihan');
+            $data['totalProduk'] = Produk::count();
+            $data['totalBahan'] = Bahan::count();
+            $data['totalSatuan'] = Satuan::count();
+            
+            $data['chartData'] = Transaksi::select(DB::raw('DATE(tanggal) as tanggal'), DB::raw('SUM(total_tagihan) as total'))
+                ->where('tanggal', '>=', now()->subDays(7))
+                ->groupBy('tanggal')
+                ->orderBy('tanggal')
+                ->get();
+        }
 
-        $transaksiTerbaru = Transaksi::with('pelanggan')->orderBy('tanggal', 'desc')->limit(5)->get();
-
-        return view('dashboard.petugas', compact(
-            'user', 'totalPelanggan', 'totalPetugas', 'totalTransaksi',
-            'totalPendapatan', 'totalProduk', 'totalBahan', 'totalSatuan',
-            'chartData', 'transaksiTerbaru'
-        ));
+        return view('dashboard.petugas', $data);
     }
 }
