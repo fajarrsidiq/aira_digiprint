@@ -330,8 +330,19 @@ class TransaksiController extends Controller
             return back()->with('error', 'File tidak ditemukan.');
         }
 
-        return response()->download(storage_path('app/public/' . $detail->file_desain)
-);
+        return response()->download(storage_path('app/public/' . $detail->file_desain));
+    }
+
+    public function indexProduksi()
+    {
+        $user = Auth::guard('petugas')->user();
+
+        $transaksis = Transaksi::with(['pelanggan', 'details.produk', 'desainer'])
+            ->where('status_pesanan', 'Diproses')
+            ->orderBy('tanggal', 'desc')
+            ->paginate(10);
+                            
+        return view('transaksi.produksi', compact('transaksis', 'user'));
     }
 
     public function updateStatus(Request $request, $id)
@@ -344,6 +355,6 @@ class TransaksiController extends Controller
         $transaksi->status_pesanan = $request->status;
         $transaksi->save();
         
-        return response()->json(['success' => true, 'message' => 'Status berhasil diupdate']);
+        return redirect()->back()->with('success', 'Status berhasil diupdate.');
     }
 }

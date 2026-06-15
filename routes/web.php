@@ -132,4 +132,10 @@ Route::middleware('auth:pelanggan')->group(function () {
     Route::get('/invoice/{id}', [PelangganTransaksiController::class, 'invoice'])->name('pelanggan.invoice');
 });
 
+// Grup khusus untuk staf produksi & desain
+Route::middleware(['auth:petugas', 'level:Desain,Produksi'])->prefix('staff')->group(function () {
+    Route::get('/pesanan', [TransaksiController::class, 'indexProduksi'])->name('transaksi.produksi');
+    Route::put('/update-status/{id}', [TransaksiController::class, 'updateStatus'])->name('transaksi.update-status');
+});
+
 require __DIR__.'/auth.php';

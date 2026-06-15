@@ -53,11 +53,18 @@
             @endif
 
             @if($userLevel === 'Owner')
-            <div class="pt-4 mt-4 border-t border-gray-200">
+                <div class="pt-4 mt-4 border-t border-gray-200">
                     <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider px-4 mb-2">Laporan</p>
                 </div>
                 <a href="{{ route('laporan.index') }}" class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all">
                     <i class="fas fa-chart-pie w-5"></i> Laporan
+                </a>
+            @endif
+            
+            @if(in_array($userLevel, ['Desain','Produksi']))
+                <a href="{{ route('transaksi.produksi') }}" class="sidebar-link flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all {{ request()->routeIs('transaksi.produksi') ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-50' }}">
+                    <i class="fas fa-tasks w-5"></i> 
+                    <span>Daftar Pesanan</span>
                 </a>
             @endif
 
