@@ -7,6 +7,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\JenisPembayaranController;
+use App\Http\Controllers\LandingController;
 use App\Http\Controllers\PelangganController;
 use App\Http\Controllers\PelangganTransaksiController;
 use App\Http\Controllers\PetugasController;
@@ -14,9 +15,9 @@ use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\SatuanController;
 use App\Http\Controllers\TransaksiController;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// Halaman Profile (index)
+Route::get('/', [LandingController::class, 'index'])->name('landing.index');
+
 
 // Dashboard petugas (semua petugas)
 Route::middleware(['auth:petugas'])->get('/dashboard/petugas', [DashboardController::class, 'petugas'])->name('dashboard.petugas');
