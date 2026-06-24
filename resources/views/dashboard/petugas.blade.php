@@ -2,11 +2,11 @@
 @section('title', 'Dashboard Petugas')
 @section('content')
 <div class="space-y-6">
-    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-lg p-6 text-white">
+    <div class="bg-gradient-to-r from-red-600 to-rose-600 rounded-2xl shadow-lg p-6 text-white">
         <div class="flex justify-between items-center">
             <div>
                 <h2 class="text-2xl font-bold">Selamat Datang, {{ $user->nama_lengkap }}!</h2>
-                <p class="text-blue-100 mt-1">Sistem Informasi CV AIRA Digiprint.</p>
+                <p class="text-red-100 mt-1">Sistem Informasi CV AIRA Digiprint.</p>
             </div>
             <div class="bg-white/20 p-3 rounded-full backdrop-blur-sm">
                 <i class="fas fa-chart-line text-2xl"></i>
@@ -25,8 +25,8 @@
                 <div class="bg-green-50 px-5 py-2 text-xs text-green-600">Seluruh karyawan</div>
             </div>
             <div class="bg-white rounded-2xl shadow-md overflow-hidden">
-                <div class="p-5"><div class="flex justify-between"><div><p class="text-gray-500 text-sm">Total Produk</p><p class="text-3xl font-bold">{{ $totalProduk }}</p></div><div class="bg-purple-100 rounded-full p-3"><i class="fas fa-boxes text-purple-600 text-xl"></i></div></div></div>
-                <div class="bg-purple-50 px-5 py-2 text-xs text-purple-600">Produk tersedia</div>
+                <div class="p-5"><div class="flex justify-between"><div><p class="text-gray-500 text-sm">Total Produk</p><p class="text-3xl font-bold">{{ $totalProduk }}</p></div><div class="bg-red-100 rounded-full p-3"><i class="fas fa-boxes text-red-600 text-xl"></i></div></div></div>
+                <div class="bg-red-50 px-5 py-2 text-xs text-red-600">Produk tersedia</div>
             </div>
             <div class="bg-white rounded-2xl shadow-md overflow-hidden">
                 <div class="p-5"><div class="flex justify-between"><div><p class="text-gray-500 text-sm">Total Transaksi</p><p class="text-3xl font-bold">{{ $totalTransaksi }}</p></div><div class="bg-yellow-100 rounded-full p-3"><i class="fas fa-receipt text-yellow-600 text-xl"></i></div></div></div>
@@ -60,10 +60,10 @@
                 <h3 class="text-lg font-semibold mb-4">Grafik Pendapatan 7 Hari Terakhir</h3>
                 <canvas id="revenueChart" height="200"></canvas>
             </div>
-            <div class="bg-indigo-50 rounded-2xl shadow p-6">
+            <div class="bg-rose-50 rounded-2xl shadow p-6">
                 <div class="flex items-center gap-4">
-                    <div class="bg-indigo-100 rounded-full p-3"><i class="fas fa-chart-pie text-indigo-600 text-2xl"></i></div>
-                    <div><p class="text-gray-500 text-sm">Rata-rata per transaksi</p><p class="text-3xl font-bold text-indigo-800">Rp {{ number_format($totalTransaksi > 0 ? $totalPendapatan / $totalTransaksi : 0, 0, ',', '.') }}</p></div>
+                    <div class="bg-rose-100 rounded-full p-3"><i class="fas fa-chart-pie text-rose-600 text-2xl"></i></div>
+                    <div><p class="text-gray-500 text-sm">Rata-rata per transaksi</p><p class="text-3xl font-bold text-rose-800">Rp {{ number_format($totalTransaksi > 0 ? $totalPendapatan / $totalTransaksi : 0, 0, ',', '.') }}</p></div>
                 </div>
             </div>
         </div>
