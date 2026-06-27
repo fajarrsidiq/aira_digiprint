@@ -33,9 +33,9 @@ RUN npm install
 RUN npm run build
 
 # Cache Laravel
-RUN php artisan config:cache || true
-RUN php artisan route:cache || true
-RUN php artisan view:cache || true
+RUN php artisan config:clear
+RUN php artisan route:clear
+RUN php artisan view:clear
 
 EXPOSE 8080
 
