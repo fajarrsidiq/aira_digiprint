@@ -79,7 +79,7 @@
             <thead class="bg-gray-50"><tr><th class="px-4 py-2 text-left">No Invoice</th><th class="px-4 py-2 text-left">Pelanggan</th><th class="px-4 py-2 text-right">Total</th><th class="px-4 py-2 text-left">Tanggal</th></tr></thead>
             <tbody>
                 @foreach($transaksiTerbaru as $trx)
-                <tr class="border-b"><td class="px-4 py-2">{{ $trx->no_invoice }}</td><td class="px-4 py-2">{{ $trx->pelanggan->username ?? '-' }}</td><td class="px-4 py-2 text-right">Rp {{ number_format($trx->total_tagihan,0,',','.') }}</td><td class="px-4 py-2">{{ $trx->tanggal->format('d/m/Y H:i') }}</td></tr>
+                <tr class="border-b"><td class="px-4 py-2">{{ $trx->no_invoice }}</td><td class="px-4 py-2">{{ $trx->pelanggan->nama_pelanggan ?? '-' }}</td><td class="px-4 py-2 text-right">Rp {{ number_format($trx->total_tagihan,0,',','.') }}</td><td class="px-4 py-2">{{ $trx->tanggal->format('d/m/Y H:i') }}</td></tr>
                 @endforeach
             </tbody>
         </table>
