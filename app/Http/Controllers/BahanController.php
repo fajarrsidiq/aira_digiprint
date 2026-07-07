@@ -36,7 +36,7 @@ class BahanController extends Controller
             'nama_bahan.unique' => 'Nama bahan sudah terdaftar, silakan gunakan nama yang lain.',
         ]);
         Bahan::create($request->all());
-        return redirect()->route('bahan.index')->with('sucess', 'Bahan berhasil ditambahkan.');
+        return redirect()->route('bahan.index')->with('success', 'Bahan berhasil ditambahkan.');
     }
 
     public function edit(Bahan $bahan)
