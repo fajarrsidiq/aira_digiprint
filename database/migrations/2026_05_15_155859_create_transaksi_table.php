@@ -24,7 +24,7 @@ return new class extends Migration
             $table->decimal('diskon', 12, 2)->default(0);
             $table->string('bukti_bayar')->nullable();
             $table->text('catatan')->nullable();
-            $table->enum('status_pesanan', ['Menunggu Konfirmasi', 'Diproses', 'Selesai', 'Dibatalkan'])->default('Menunggu Konfirmasi');
+            $table->enum('status_pesanan', ['Menunggu Konfirmasi', 'Diproses', 'Selesai', 'Ditolak'])->default('Menunggu Konfirmasi');
             $table->timestamps();
 
             $table->foreign('id_pelanggan')->references('id_pelanggan')->on('pelanggan')->onDelete('restrict')->onUpdate('cascade');

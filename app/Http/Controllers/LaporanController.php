@@ -11,7 +11,8 @@ class LaporanController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Transaksi::with(['pelanggan', 'pembayaran']);
+        $query = Transaksi::with(['pelanggan', 'pembayaran'])
+                      ->where('status_pesanan', '!=', 'Ditolak'); // Tambahkan baris ini
 
         if ($request->filled(['tgl_awal', 'tgl_akhir'])) {
             $query->whereBetween('tanggal', [$request->tgl_awal, $request->tgl_akhir]);
@@ -38,7 +39,8 @@ class LaporanController extends Controller
 
     public function export(Request $request)
     {
-        $query = Transaksi::with(['pelanggan', 'pembayaran']);
+        $query = Transaksi::with(['pelanggan', 'pembayaran'])
+                      ->where('status_pesanan', '!=', 'Ditolak');
 
         if ($request->filled(['tgl_awal', 'tgl_akhir'])) {
             $query->whereBetween('tanggal', [$request->tgl_awal, $request->tgl_akhir]);

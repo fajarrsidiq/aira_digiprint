@@ -27,9 +27,9 @@ class DashboardController extends Controller
         if (in_array($user->level, ['Owner', 'Administrasi'])) {
             $data['totalPelanggan'] = Pelanggan::count();
             $data['totalPetugas']   = Petugas::count();
-            $data['totalTransaksi'] = Transaksi::count();
-            $data['totalPendapatan'] = Transaksi::sum('total_tagihan');
-            $data['totalDiterima']   = Transaksi::sum('jumlah_bayar');
+            $data['totalTransaksi'] = Transaksi::where('status_pesanan', '!=', 'Ditolak')->count();
+            $data['totalPendapatan'] = Transaksi::where('status_pesanan', '!=', 'Ditolak')->sum('total_tagihan');
+            $data['totalDiterima'] = Transaksi::where('status_pesanan', '!=', 'Ditolak')->sum('jumlah_bayar');
             $data['totalPiutang']    = $data['totalPendapatan'] - $data['totalDiterima'];
             $data['totalProduk']  = Produk::count();
             $data['totalBahan']   = Bahan::count();

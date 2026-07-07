@@ -25,16 +25,19 @@
                     <td class="p-3 border">{{ $t->pembayaran->nama_metode ?? '-' }}</td>
                     <td class="p-3 border">
                         <span class="px-2 py-1 rounded text-xs font-bold 
-                            {{ $t->status_pesanan == 'Selesai' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700' }}">
+                            {{ $t->status_pesanan == 'Selesai' ? 'bg-green-100 text-green-700' : 
+                            ($t->status_pesanan == 'Ditolak' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700') }}">
                             {{ $t->status_pesanan }}
                         </span>
                     </td>
                     <td class="p-3 border text-center">
-                        @if($t->status_pesanan != 'Menunggu Konfirmasi')
+                        @if($t->status_pesanan != 'Menunggu Konfirmasi' && $t->status_pesanan != 'Ditolak')
                             <a href="{{ route('pelanggan.invoice', $t->id_transaksi) }}" target="_blank" 
                             class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1 rounded text-xs font-bold transition">
                             Lihat Invoice
                             </a>
+                        @elseif($t->status_pesanan == 'Ditolak')
+                            <span class="text-xs text-red-500 font-bold">Ditolak</span>
                         @else
                             <span class="text-xs text-gray-400 italic">Menunggu...</span>
                         @endif

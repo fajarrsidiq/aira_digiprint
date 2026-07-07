@@ -270,6 +270,10 @@ class TransaksiController extends Controller
             'petugas'
         ])->findOrFail($id);
 
+        if ($transaksi->status_pesanan === 'Ditolak') {
+            return redirect()->back()->with('error', 'Invoice tidak tersedia untuk pesanan yang ditolak.');
+        }
+
         $pdf = Pdf::loadView('transaksi.invoice', compact('transaksi'));
         
         return $pdf->stream('invoice-' . $transaksi->no_invoice . '.pdf');

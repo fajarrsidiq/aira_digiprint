@@ -36,12 +36,10 @@
                                     <div class="flex items-center gap-2">
                                         <div class="flex-1 flex items-center bg-white border border-gray-300 rounded overflow-hidden">
                                             <input type="number" id="panjangInput" class="w-full text-sm px-3 py-2 focus:outline-none" placeholder="Panjang" step="0.01">
-                                            <span class="text-xs text-gray-400 bg-gray-50 px-2 border-l border-gray-200 py-2">M</span>
                                         </div>
                                         <span class="text-sm font-semibold text-gray-400">x</span>
                                         <div class="flex-1 flex items-center bg-white border border-gray-300 rounded overflow-hidden">
                                             <input type="number" id="lebarInput" class="w-full text-sm px-3 py-2 focus:outline-none" placeholder="Lebar" step="0.01">
-                                            <span class="text-xs text-gray-400 bg-gray-50 px-2 border-l border-gray-200 py-2">M</span>
                                         </div>
                                     </div>
                                 </div>

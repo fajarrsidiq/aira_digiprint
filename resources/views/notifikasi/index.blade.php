@@ -58,12 +58,11 @@
                             </button>
                         </form>
 
-                        <form id="delete-form-{{ $p->id_transaksi }}" action="{{ route('admin.notifikasi.proses', $p->id_transaksi) }}" method="POST" style="display:inline;">
+                        <form action="{{ route('admin.notifikasi.proses', $p->id_transaksi) }}" method="POST" style="display:inline;">
                             @csrf
-                            <input type="hidden" name="action" value="hapus">
-                            <button type="button" onclick="confirmDelete('{{ $p->id_transaksi }}', '{{ $p->no_invoice }}')" 
-                                    class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs font-bold">
-                                Hapus
+                            <input type="hidden" name="action" value="tolak">
+                            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs font-bold">
+                                Tolak
                             </button>
                         </form>
                     </td>
