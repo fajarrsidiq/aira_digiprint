@@ -14,4 +14,8 @@ class JenisPembayaran extends Model
     {
         return $this->hasMany(Transaksi::class, 'id_pembayaran', 'id_jenis_pembayaran');
     }
+    public function setNamaMetodeAttribute($value)
+    {
+        $this->attributes['nama_metode'] = strtolower($value);
+    }
 }

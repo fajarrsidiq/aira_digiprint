@@ -37,12 +37,18 @@ class PelangganTransaksiController extends Controller
 
         $request->validate([
             'cart' => 'required|json',
-            'id_pembayaran' => 'required|exists:jenis_pembayaran,id_jenis_pembayaran',
             'jumlah_bayar' => 'required|numeric|min:0',
             'bukti_bayar' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
             'id_petugas' => 'nullable',
             'id_desainer' => 'nullable'
         ]);
+
+        $metodeTransfer = JenisPembayaran::whereRaw('LOWER(nama_metode) = ?', ['transfer'])->first();
+
+        if (!$metodeTransfer || $request->id_pembayaran != $metodeTransfer->id_jenis_pembayaran) {
+            return back()->with('error', 'Metode pembayaran tidak valid.');
+        }
+        $idPembayaran = $metodeTransfer->id_jenis_pembayaran;
 
         DB::beginTransaction();
         try {

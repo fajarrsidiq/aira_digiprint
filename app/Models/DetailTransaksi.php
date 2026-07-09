@@ -10,7 +10,7 @@ class DetailTransaksi extends Model
     protected $primaryKey = 'id_detail';
     protected $fillable = [
         'id_transaksi', 'id_produk', 'keterangan_ukuran',
-        'file_desain', 'harga', 'qty', 'subtotal'
+        'file_desain', 'harga', 'qty', 'subtotal', 'file_desain_final', 'status_desain'
     ];
 
     public function transaksi()

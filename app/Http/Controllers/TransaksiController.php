@@ -349,16 +349,35 @@ class TransaksiController extends Controller
         return view('transaksi.produksi', compact('transaksis', 'user'));
     }
 
+    public function uploadFinal(Request $request, $id_detail)
+    {
+        $request->validate(['file_desain_final' => 'required|file|mimes:pdf,cdr,ai,jpg,png|max:10240']);
+        
+        $detail = \App\Models\DetailTransaksi::findOrFail($id_detail);
+        $path = $request->file('file_desain_final')->store('desain_final', 'public');
+        
+        $detail->update([
+            'file_desain_final' => $path,
+            'status_desain'     => 'Final'
+        ]);
+
+        return back()->with('success', 'Desain final berhasil diunggah.');
+    }
+
     public function updateStatus(Request $request, $id)
     {
-        $request->validate([
-            'status' => 'required|in:Menunggu Konfirmasi,Diproses,Selesai'
-        ]);
-        
-        $transaksi = Transaksi::findOrFail($id);
-        $transaksi->status_pesanan = $request->status;
-        $transaksi->save();
-        
-        return redirect()->back()->with('success', 'Status berhasil diupdate.');
+        $transaksi = \App\Models\Transaksi::with('details')->findOrFail($id);
+
+        // Mencegah Produksi menekan Selesai jika desain belum Final
+        if ($request->status == 'Selesai') {
+            foreach ($transaksi->details as $detail) {
+                if ($detail->status_desain !== 'Final') {
+                    return back()->with('error', 'Gagal! Semua desain harus berstatus "Final" sebelum menyelesaikan pesanan.');
+                }
+            }
+        }
+
+        $transaksi->update(['status_pesanan' => $request->status]);
+        return back()->with('success', 'Status pesanan berhasil diperbarui.');
     }
 }

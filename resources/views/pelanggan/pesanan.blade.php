@@ -139,10 +139,21 @@
                                 </div>
                             </div>
 
+                            @php
+                                // Mencari metode pembayaran yang mengandung kata 'transfer' (case-insensitive)
+                                $metodeTransfer = $pembayarans->first(function($item) {
+                                    return strtolower($item->nama_metode) === 'transfer';
+                                });
+                            @endphp
+
                             <div class="grid grid-cols-3 items-center gap-2">
                                 <label class="text-xs font-semibold text-gray-600">Jenis Bayar</label>
                                 <div class="col-span-2">
-                                    <input type="text" value="Transfer" class="w-full text-sm px-3 py-1.5 bg-gray-100 border border-gray-300 rounded text-gray-700 font-medium" readonly>
+                                    <input type="hidden" name="id_pembayaran" value="{{ $metodeTransfer->id_jenis_pembayaran ?? '' }}">
+                                    
+                                    <input type="text" value="{{ $metodeTransfer->nama_metode ?? 'Metode Tidak Ditemukan' }}" 
+                                        class="w-full text-sm px-3 py-1.5 bg-gray-100 border border-gray-300 rounded text-gray-700 font-medium" 
+                                        readonly>
                                 </div>
                             </div>
                         </div>
@@ -378,6 +389,17 @@
 
     document.getElementById('tambahItemBtn').onclick = async function() {
         if (!currentProduk) return alert('Pilih produk dulu!');
+        // --- Validasi Ukuran ---
+        let p = document.getElementById('panjangInput').value;
+        let l = document.getElementById('lebarInput').value;
+        if (isCustomSize(currentProduk.ukuran_default) && (!p || !l)) {
+            return alert('Panjang dan Lebar wajib diisi!');
+        }
+
+        // --- Validasi Desain ---
+        if (!currentFile) {
+            return alert('Upload desain wajib diisi!');
+        }
         let qty = parseInt(document.getElementById('qtyInput').value) || 1;
         let hargaSatuan = hitungHarga();
         let totalPerItem = hargaSatuan * qty;

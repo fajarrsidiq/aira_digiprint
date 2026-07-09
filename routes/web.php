@@ -108,15 +108,16 @@ Route::middleware(['auth:petugas', 'level:Owner,Administrasi'])->prefix('transak
     Route::post('/', [TransaksiController::class, 'store'])->name('store');
     Route::get('/{id}', [TransaksiController::class, 'show'])->name('show');
     Route::delete('/{id}', [TransaksiController::class, 'destroy'])->name('destroy');
-
     // Alur penanganan berkas dan pencetakan invoice
     Route::get('/{id}/invoice', [TransaksiController::class, 'invoice'])->name('invoice');
-    // Ganti baris lama Anda dengan ini:
-    Route::get('/download-desain/{id_detail}', [TransaksiController::class, 'downloadDesain'])->name('download-desain');
-    
     // Alur baru halaman pelunasan (Sudah otomatis bernama transaksi.pelunasan & transaksi.proses-pelunasan)
     Route::get('/{id}/pelunasan', [TransaksiController::class, 'halamanPelunasan'])->name('pelunasan');
     Route::put('/{id}/proses-pelunasan', [TransaksiController::class, 'prosesPelunasan'])->name('proses-pelunasan');
+});
+
+// Grup petugas untuk unduh desain
+Route::middleware(['auth:petugas'])->group(function () {
+    Route::get('/transaksi/download-desain/{id_detail}', [TransaksiController::class, 'downloadDesain'])->name('transaksi.download-desain');
 });
 
 // Khusus Petugas (Laporan)
@@ -136,7 +137,11 @@ Route::middleware('auth:pelanggan')->group(function () {
 // Grup khusus untuk staf produksi & desain
 Route::middleware(['auth:petugas', 'level:Desain,Produksi'])->prefix('staff')->group(function () {
     Route::get('/pesanan', [TransaksiController::class, 'indexProduksi'])->name('transaksi.produksi');
+    // Alur upload desain final
+    Route::post('/transaksi/upload-final/{id_detail}', [TransaksiController::class, 'uploadFinal'])->name('transaksi.upload-final');
     Route::put('/update-status/{id}', [TransaksiController::class, 'updateStatus'])->name('transaksi.update-status');
 });
+
+
 
 require __DIR__.'/auth.php';

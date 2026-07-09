@@ -75,8 +75,7 @@
                                             <span class="text-[10px] text-gray-500">{{ $detail->produk->nama_produk ?? 'Produk' }}</span>
                                             <div class="flex gap-2 justify-center">
                                                 <a href="{{ asset('storage/' . $detail->file_desain) }}" target="_blank" class="text-blue-600 hover:underline">Lihat</a>
-                                                
-                                                <a href="{{ route('transaksi.download-desain', $detail->id_detail) }}" class="text-gray-600 hover:underline">Unduh</a>
+                                                <a href="{{ route('transaksi.download-desain', $detail->id_detail) }}">Unduh</a>
                                             </div>
                                         </div>
                                     @endif
