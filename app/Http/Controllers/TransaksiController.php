@@ -13,20 +13,16 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Filesystem\FilesystemAdapter;
 use App\Models\Petugas;
 
 class TransaksiController extends Controller
 {
-   public function index(Request $request)
+    public function index(Request $request)
     {
-        // Mengambil nilai pencarian dari input 'search'
         $search = $request->get('search');
 
-        // Membangun query dengan relasi yang dibutuhkan
         $transaksis = Transaksi::with(['pelanggan', 'petugas', 'pembayaran', 'details.produk'])
             ->when($search, function ($query, $search) {
-                // Logika pencarian: mencari berdasarkan nomor invoice ATAU nama pelanggan
                 return $query->where('no_invoice', 'like', '%' . $search . '%')
                     ->orWhereHas('pelanggan', function ($q) use ($search) {
                         $q->where('nama_pelanggan', 'like', '%' . $search . '%');
@@ -41,13 +37,11 @@ class TransaksiController extends Controller
     public function create()
     {
         $pelanggans = Pelanggan::all();
-        $pelanggans = Pelanggan::all();
         $pembayarans = JenisPembayaran::all();
         $produks = Produk::all();
 
         $desainers = Petugas::where('level', 'Desain')->get();
 
-        // MEMBUAT INVOICE OTOMATIS AMAN (Maksimal 15 Karakter: INV-300526-0001)
         $hariIni = date('dmy'); 
         $prefix = 'INV-' . $hariIni . '-';
         
@@ -95,13 +89,47 @@ class TransaksiController extends Controller
             'bukti_bayar.max' => 'Ukuran gambar bukti pembayaran maksimal 2 MB.',
         ]);
 
+        $cart = json_decode($request->cart, true);
+        if (empty($cart)) {
+            return back()->withInput()->with('error', 'Keranjang belanja tidak boleh kosong.');
+        }
+
+        // PERHITUNGAN ULANG SUBTOTAL & TOTAL TAGIHAN SERVER-SIDE
+        $totalTagihanBackend = 0;
+        foreach ($cart as $item) {
+            $produk = Produk::find($item['produk_id']);
+            if (!$produk) continue;
+
+            $hargaSatuan = $produk->harga;
+            $ukuran = $item['ukuran'] ?? $produk->ukuran_default;
+
+            if ($ukuran && str_contains($ukuran, 'x')) {
+                $parts = explode('x', $ukuran);
+                if (count($parts) == 2) {
+                    $panjang = floatval(preg_replace('/[^0-9.]/', '', $parts[0]));
+                    $lebar = floatval(preg_replace('/[^0-9.]/', '', $parts[1]));
+                    if ($panjang > 0 && $lebar > 0) {
+                        $hargaSatuan = $produk->harga * ($panjang * $lebar);
+                    }
+                }
+            }
+            $totalTagihanBackend += ($hargaSatuan * $item['qty']);
+        }
+
+        $diskon = $request->diskon ?? 0;
+        $totalSetelahDiskon = $totalTagihanBackend - $diskon;
+        if ($totalSetelahDiskon < 0) $totalSetelahDiskon = 0;
+
+        // VALIDASI DP MINIMAL 50% SISI BACKEND
+        $minimalDpBackend = $totalSetelahDiskon * 0.50;
+        if ($request->jumlah_bayar < $minimalDpBackend) {
+            return back()
+                ->withInput()
+                ->with('error', 'Gagal memproses transaksi: Nominal bayar kurang dari syarat minimal DP 50% (Rp ' . number_format($minimalDpBackend, 0, ',', '.') . ').');
+        }
+
         DB::beginTransaction();
         try {
-            $cart = json_decode($request->cart, true);
-            if (empty($cart)) {
-                throw new \Exception('Keranjang belanja kosong');
-            }
-
             $hariIni = date('dmy');
             $prefix = 'INV-' . $hariIni . '-';
             $transaksiTerakhir = Transaksi::where('no_invoice', 'like', $prefix . '%')
@@ -117,7 +145,6 @@ class TransaksiController extends Controller
             
             $noInvoice = $prefix . $nomorUrutBaru;
 
-            $totalTagihan = 0;
             $cartData = [];
 
             foreach ($cart as $item) {
@@ -141,7 +168,6 @@ class TransaksiController extends Controller
                 }
                 
                 $subtotal = $hargaSatuan * $item['qty'];
-                $totalTagihan += $subtotal;
                 
                 $fileDesainPath = null;
                 if (!empty($item['file_desain_base64']) && !empty($item['file_desain_name'])) {
@@ -162,16 +188,10 @@ class TransaksiController extends Controller
                 ];
             }
             
-            $diskon = $request->diskon ?? 0;
-            $totalSetelahDiskon = $totalTagihan - $diskon;
-            if ($totalSetelahDiskon < 0) $totalSetelahDiskon = 0;
-            
             $buktiBayar = null;
             if ($request->hasFile('bukti_bayar')) {
                 $buktiBayar = $request->file('bukti_bayar')->store('bukti_pembayaran', 'public');
             }
-            
-            $statusPesanan = $request->status_pesanan ?? 'Diproses';
             
             /** @var Petugas|null $petugas */
             $petugas = Auth::guard('petugas')->user();
@@ -259,8 +279,6 @@ class TransaksiController extends Controller
         return redirect()->route('transaksi.index')->with('success', 'Transaksi berhasil dihapus.');
     }
 
-    
-    //Mengarahkan langsung cetak pada halaman invoice.blade.php Anda
     public function invoice($id)
     {
         $transaksi = Transaksi::with([
@@ -279,7 +297,6 @@ class TransaksiController extends Controller
         return $pdf->stream('invoice-' . $transaksi->no_invoice . '.pdf');
     }
 
-    //Menampilkan Form Khusus Pelunasan Baru (Mengambil rincian data nota pembelian)
     public function halamanPelunasan($id)
     {
         $transaksi = Transaksi::with(['pelanggan', 'pembayaran', 'details.produk', 'petugas'])->findOrFail($id);
@@ -287,7 +304,6 @@ class TransaksiController extends Controller
         return view('transaksi.pelunasan', compact('transaksi', 'pembayarans'));
     }
 
-    //Memproses logika kalkulasi sisa keuangan pelunasan dari form
     public function prosesPelunasan(Request $request, $id)
     {
         $request->validate([
@@ -307,7 +323,6 @@ class TransaksiController extends Controller
 
         $transaksi = Transaksi::findOrFail($id);
 
-        // Akumulasikan nilai pembayaran pelunasan baru ke field lama
         $transaksi->jumlah_bayar += $request->bayar_pelunasan;
         $transaksi->id_pembayaran = $request->id_pembayaran;
 
@@ -323,13 +338,10 @@ class TransaksiController extends Controller
         return redirect()->route('transaksi.index')->with('success', 'Pelunasan sisa transaksi ' . $transaksi->no_invoice . ' berhasil diperbarui!');
     }
 
-    //Menangani unduhan file desain item cetak dari storage link
     public function downloadDesain($id_detail)
     {
-        // Cari detail transaksi berdasarkan ID spesifik dari tombol yang diklik
         $detail = \App\Models\DetailTransaksi::findOrFail($id_detail);
 
-        // Cek apakah file benar-benar ada
         if (!$detail->file_desain || !Storage::disk('public')->exists($detail->file_desain)) {
             return back()->with('error', 'File tidak ditemukan.');
         }
@@ -368,7 +380,6 @@ class TransaksiController extends Controller
     {
         $transaksi = \App\Models\Transaksi::with('details')->findOrFail($id);
 
-        // Mencegah Produksi menekan Selesai jika desain belum Final
         if ($request->status == 'Selesai') {
             foreach ($transaksi->details as $detail) {
                 if ($detail->status_desain !== 'Final') {

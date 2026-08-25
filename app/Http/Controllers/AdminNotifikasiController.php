@@ -12,13 +12,17 @@ class AdminNotifikasiController extends Controller
 {
     public function index()
     {
-        $pesanans = Transaksi::where('status_pesanan', 'Menunggu Konfirmasi')->get();
+        // Menggunakan eager loading 'details.produk' sesuai nama relasi di Model Transaksi Anda
+        $pesanans = Transaksi::with(['pelanggan', 'details.produk'])
+            ->where('status_pesanan', 'Menunggu Konfirmasi')
+            ->get();
+
         $desainers = Petugas::where('level', 'Desain')->get(); 
         
         return view('notifikasi.index', compact('pesanans', 'desainers'));
     }
 
-   public function proses(Request $request, $id)
+    public function proses(Request $request, $id)
     {
         $transaksi = Transaksi::findOrFail($id);
 

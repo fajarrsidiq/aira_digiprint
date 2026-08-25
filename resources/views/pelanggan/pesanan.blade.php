@@ -2,9 +2,22 @@
 @section('title', 'Input Pesanan')
 @section('content')
 <div class="w-full p-2 md:p-4 min-h-screen">
-    <form method="POST"  action="{{ route('pelanggan.pesanan.store') }}" enctype="multipart/form-data" id="transaksiForm">
+
+    @if(session('error'))
+        <div class="mb-4 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 text-sm font-semibold rounded shadow-sm">
+            {{ session('error') }}
+        </div>
+    @endif
+    @if(session('success'))
+        <div class="mb-4 p-4 bg-green-100 border-l-4 border-green-500 text-green-700 text-sm font-semibold rounded shadow-sm">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    <form method="POST" action="{{ route('pelanggan.pesanan.store') }}" enctype="multipart/form-data" id="transaksiForm">
         @csrf
         <div class="flex flex-col gap-6 w-full">
+            <!-- INPUT PESANAN -->
             <div class="bg-white border border-gray-300 rounded-lg shadow-sm overflow-hidden w-full">
                 <div class="bg-gray-50 px-5 py-3 border-b border-gray-300">
                     <strong class="text-sm font-semibold text-gray-700 tracking-wider">INPUT PESANAN</strong>
@@ -58,7 +71,7 @@
                                 <input type="number" id="qtyInput" class="w-full text-sm px-3 py-2 bg-white border border-gray-300 rounded text-gray-700 focus:outline-none focus:border-blue-500" value="1" min="1">
                             </div>
                             <div class="flex flex-col gap-1.5">
-                                <label class="text-xs font-semibold text-gray-600">Upload Desain</label>
+                                <label class="text-xs font-semibold text-gray-600">Upload Desain<span class="text-red-500">*</span></label>
                                 <input type="file" id="desainInput" class="w-full text-sm file:mr-4 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border border-gray-300 rounded bg-white text-gray-500 focus:outline-none" accept="image/*,application/pdf">
                                 <small class="text-xs text-gray-400 font-medium mt-1 block truncate" id="namaFileDesain"></small>
                             </div>
@@ -71,6 +84,7 @@
                 </div>
             </div>
 
+            <!-- DETAIL TRANSAKSI -->
             <div class="bg-white border border-gray-300 rounded-lg shadow-sm overflow-hidden w-full">
                 <div class="bg-gray-50 px-5 py-3 border-b border-gray-300">
                     <strong class="text-sm font-semibold text-gray-700 tracking-wider">DETAIL TRANSAKSI</strong>
@@ -104,6 +118,7 @@
                 </div>
             </div>
 
+            <!-- PEMBAYARAN TRANSAKSI -->
             <div class="bg-white border border-gray-300 rounded-lg shadow-sm overflow-hidden w-full">
                 <div class="bg-gray-50 px-5 py-3 border-b border-gray-300">
                     <strong class="text-sm font-semibold text-gray-700 tracking-wider">PEMBAYARAN TRANSAKSI</strong>
@@ -119,15 +134,20 @@
                     </div>
 
                     <input type="hidden" id="cartInput" name="cart">
-                    <input type="hidden" name="id_pembayaran" value="{{ $pembayarans->where('nama_metode', 'Transfer')->first()->id_jenis_pembayaran ?? '' }}">
                     <input type="hidden" name="status_pesanan" value="Menunggu Konfirmasi">
+
+                    @php
+                        $metodeTransfer = $pembayarans->first(function($item) {
+                            return strtolower($item->nama_metode) === 'transfer';
+                        });
+                    @endphp
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4">
                         <div class="flex flex-col gap-4">
                             <div class="grid grid-cols-3 items-start gap-2">
                                 <label class="text-xs font-semibold text-gray-600 pt-1">Catatan</label>
                                 <div class="col-span-2">
-                                    <textarea name="catatan" rows="3" class="w-full text-sm px-3 py-1.5 bg-white border border-gray-300 rounded text-gray-700 focus:border-blue-500 focus:outline-none" placeholder="Masukkan catatan tambahan di sini..."></textarea>
+                                    <textarea name="catatan" rows="3" class="w-full text-sm px-3 py-1.5 bg-white border border-gray-300 rounded text-gray-700 focus:border-blue-500 focus:outline-none" placeholder="Masukkan catatan tambahan di sini...">{{ old('catatan') }}</textarea>
                                 </div>
                             </div>
                             
@@ -139,18 +159,10 @@
                                 </div>
                             </div>
 
-                            @php
-                                // Mencari metode pembayaran yang mengandung kata 'transfer' (case-insensitive)
-                                $metodeTransfer = $pembayarans->first(function($item) {
-                                    return strtolower($item->nama_metode) === 'transfer';
-                                });
-                            @endphp
-
                             <div class="grid grid-cols-3 items-center gap-2">
                                 <label class="text-xs font-semibold text-gray-600">Jenis Bayar</label>
                                 <div class="col-span-2">
                                     <input type="hidden" name="id_pembayaran" value="{{ $metodeTransfer->id_jenis_pembayaran ?? '' }}">
-                                    
                                     <input type="text" value="{{ $metodeTransfer->nama_metode ?? 'Metode Tidak Ditemukan' }}" 
                                         class="w-full text-sm px-3 py-1.5 bg-gray-100 border border-gray-300 rounded text-gray-700 font-medium" 
                                         readonly>
@@ -162,25 +174,26 @@
                             <div class="grid grid-cols-3 items-center gap-2">
                                 <label class="text-xs font-semibold text-gray-600">Diskon</label>
                                 <div class="col-span-2">
-                                    <input type="text"  class="w-full text-sm px-3 py-1.5 bg-gray-100 border border-gray-300 rounded text-gray-400 italic" readonly id="diskonInput">
+                                    <input type="text" class="w-full text-sm px-3 py-1.5 bg-gray-100 border border-gray-300 rounded text-gray-400 italic" readonly id="diskonInput" value="Rp 0">
                                 </div>
                             </div>
                             <div class="grid grid-cols-3 items-center gap-2">
                                 <label class="text-xs font-semibold text-gray-600">Total Tagihan</label>
                                 <div class="col-span-2">
-                                    <input type="text" id="totalTagihanDisplay" class="w-full text-sm px-3 py-1.5 bg-gray-200 border border-gray-300 rounded text-gray-800 font-bold" readonly>
+                                    <input type="text" id="totalTagihanDisplay" class="w-full text-sm px-3 py-1.5 bg-gray-200 border border-gray-300 rounded text-gray-800 font-bold" readonly value="Rp 0">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-3 items-start gap-2">
+                                <label class="text-xs font-semibold text-gray-600 pt-1">Nominal Transfer<span class="text-red-500">*</span></label>
+                                <div class="col-span-2">
+                                    <input type="number" id="jumlahBayarInput" name="jumlah_bayar" class="w-full text-sm px-3 py-1.5 bg-white border border-gray-300 rounded text-gray-700 focus:border-blue-500 focus:outline-none" required placeholder="0" value="{{ old('jumlah_bayar') }}">
+                                    <small id="hintMinimalDp" class="text-[11px] text-red-600 font-bold mt-1 block">Minimal DP 50%: Rp 0</small>
                                 </div>
                             </div>
                             <div class="grid grid-cols-3 items-center gap-2">
-                                <label class="text-xs font-semibold text-gray-600">Nominal Transfer</label>
+                                <label class="text-xs font-semibold text-gray-600">Bukti Bayar<span class="text-red-500">*</span></label>
                                 <div class="col-span-2">
-                                    <input type="number" name="jumlah_bayar" class="w-full text-sm px-3 py-1.5 bg-white border border-gray-300 rounded text-gray-700 focus:border-blue-500 focus:outline-none" required>
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-3 items-center gap-2">
-                                <label class="text-xs font-semibold text-gray-600">Bukti Bayar</label>
-                                <div class="col-span-2">
-                                    <input type="file" name="bukti_bayar" class="w-full text-sm file:mr-3 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:bg-gray-100 border border-gray-300 rounded bg-white" required>
+                                    <input type="file" name="bukti_bayar" class="w-full text-sm file:mr-3 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:bg-gray-100 border border-gray-300 rounded bg-white" required accept="image/*">
                                 </div>
                             </div>
                         </div>
@@ -199,12 +212,12 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-    // --- Global State ---
     let cart = [];
     let currentFile = null;
     let currentProduk = null;
+    let totalTagihanAkhir = 0;
+    let minimalDp = 0;
 
-    // SweetAlert2 Buttons Styling
     const swalWithBootstrapButtons = Swal.mixin({
         customClass: {
             confirmButton: "bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded ml-2 text-xs uppercase tracking-wider",
@@ -213,23 +226,19 @@
         buttonsStyling: false
     });
 
-    // Helper: Validasi ukuran custom
     function isCustomSize(ukuran) {
         return ukuran && (ukuran.toLowerCase().includes('x') || ukuran.toLowerCase().includes('pxl'));
     }
 
-    // --- Fungsi Global untuk Input ---
     window.updateQty = function(idx, val) {
         let qty = parseInt(val) || 1;
         if (qty < 1) qty = 1;
-        // Hitung ulang total: ambil harga satuan asli dengan membagi total lama dengan qty lama
         let hargaSatuan = cart[idx].total / cart[idx].qty;
         cart[idx].qty = qty;
         cart[idx].total = hargaSatuan * qty;
         updateCartDisplay();
     };
 
-    // Hapus baris item tertentu dari keranjang dengan alert
     window.hapusItem = function(idx, nama) {
         swalWithBootstrapButtons.fire({
             title: "Apakah Anda yakin?",
@@ -255,26 +264,21 @@
         });
     };
 
-    // --- Render Tabel (Dengan Logika Diskon Qty) ---
     function updateCartDisplay() {
         let html = '';
         let subtotal = 0;
-        let totalQty = 0; // Variabel penampung jumlah barang
+        let totalQty = 0;
         
         cart.forEach((item, idx) => {
             subtotal += item.total;
-            totalQty += parseInt(item.qty); // Menghitung total qty
+            totalQty += parseInt(item.qty);
 
-            // --- LOGIKA PREVIEW DESAIN ---
             let desainPreview = '<span class="text-gray-400 italic">Tidak ada</span>';
 
             if (item.file_desain_base64) {
-                // Cek tipe file dari item.file_desain_type (Pastikan Anda sudah menyimpan tipe file saat push ke cart)
-                // Jika tidak ada tipe, kita bisa cek berdasarkan ekstensi nama file
                 let isImage = item.file_desain_name.match(/\.(jpg|jpeg|png|gif|webp)$/i);
 
                 if (isImage) {
-                    // Tampilkan sebagai Gambar
                     desainPreview = `
                         <div class="flex flex-col items-center gap-1">
                             <img src="data:image/*;base64,${item.file_desain_base64}" class="w-12 h-12 object-cover rounded border border-gray-300 shadow-sm mx-auto">
@@ -283,7 +287,6 @@
                             </span>
                         </div>`;
                 } else {
-                    // Tampilkan sebagai Ikon File (untuk PDF/CDR/lainnya)
                     desainPreview = `
                         <div class="flex flex-col items-center gap-1 text-blue-600">
                             <span class="text-xl">📄</span>
@@ -317,7 +320,6 @@
         document.getElementById('cartTableBody').innerHTML = html;
         document.getElementById('subtotalDisplay').innerText = 'Rp ' + subtotal.toLocaleString('id-ID');
 
-        // --- Logika Diskon Berdasarkan Total Qty ---
         let diskonPersen = 0;
         if (totalQty >= 100) {
             diskonPersen = 10;
@@ -326,18 +328,23 @@
         }
 
         let nilaiDiskon = (subtotal * diskonPersen) / 100;
-        let totalAkhir = subtotal - nilaiDiskon;
-        // ------------------------------------------
+        totalTagihanAkhir = subtotal - nilaiDiskon;
+        minimalDp = totalTagihanAkhir * 0.50;
 
-        // Update Field di Form (Pastikan ID ini ada di HTML Anda)
         if(document.getElementById('diskonInput')) {
-            document.getElementById('diskonInput').value = nilaiDiskon;
+            document.getElementById('diskonInput').value = 'Rp ' + nilaiDiskon.toLocaleString('id-ID');
         }
-        document.getElementById('totalTagihanDisplay').value = 'Rp ' + totalAkhir.toLocaleString('id-ID');
+        document.getElementById('totalTagihanDisplay').value = 'Rp ' + totalTagihanAkhir.toLocaleString('id-ID');
         document.getElementById('cartInput').value = JSON.stringify(cart);
+
+        let inputBayar = document.getElementById('jumlahBayarInput');
+        if (inputBayar) {
+            inputBayar.min = minimalDp;
+        }
+
+        document.getElementById('hintMinimalDp').innerText = 'Minimal DP 50%: Rp ' + minimalDp.toLocaleString('id-ID');
     }
 
-    // --- Logika Form & Input ---
     function resetInputForm() {
         document.getElementById('produkSelect').value = '';
         if (document.getElementById('panjangInput')) document.getElementById('panjangInput').value = '';
@@ -389,17 +396,17 @@
 
     document.getElementById('tambahItemBtn').onclick = async function() {
         if (!currentProduk) return alert('Pilih produk dulu!');
-        // --- Validasi Ukuran ---
+        
         let p = document.getElementById('panjangInput').value;
         let l = document.getElementById('lebarInput').value;
         if (isCustomSize(currentProduk.ukuran_default) && (!p || !l)) {
             return alert('Panjang dan Lebar wajib diisi!');
         }
 
-        // --- Validasi Desain ---
         if (!currentFile) {
             return alert('Upload desain wajib diisi!');
         }
+
         let qty = parseInt(document.getElementById('qtyInput').value) || 1;
         let hargaSatuan = hitungHarga();
         let totalPerItem = hargaSatuan * qty;
@@ -427,6 +434,47 @@
         updateCartDisplay();
         resetInputForm();
     };
+
+    // --- PENCEGAHAN SUBMIT & NOTIFIKASI VALIDASI ---
+    document.addEventListener('DOMContentLoaded', function() {
+        const formTransaksi = document.getElementById('transaksiForm');
+
+        formTransaksi.addEventListener('submit', function(e) {
+            // 1. Validasi Keranjang Kosong
+            if (cart.length === 0) {
+                e.preventDefault();
+                e.stopPropagation();
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Keranjang Belanja Kosong!',
+                    text: 'Silakan tambahkan minimal satu produk sebelum memproses transaksi.',
+                    confirmButtonColor: '#2563eb'
+                });
+                return false;
+            }
+
+            // 2. Ambil Nilai Bayar & Bandingkan
+            let inputBayar = document.getElementById('jumlahBayarInput');
+            let nominalBayar = parseFloat(inputBayar.value) || 0;
+
+            // 3. Notifikasi Peringatan Jika Kurang dari 50%
+            if (nominalBayar < minimalDp) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Nominal Transfer Kurang!',
+                    html: `Nominal transfer yang Anda masukkan <b>Rp ${nominalBayar.toLocaleString('id-ID')}</b>.<br>` +
+                          `Syarat minimal pembayaran DP (50%) adalah <b>Rp ${minimalDp.toLocaleString('id-ID')}</b>.`,
+                    confirmButtonColor: '#dc2626'
+                });
+
+                inputBayar.focus();
+                return false;
+            }
+        });
+    });
 
     document.getElementById('produkSelect').addEventListener('change', updateUkuranForm);
     document.getElementById('panjangInput').addEventListener('input', hitungHarga);

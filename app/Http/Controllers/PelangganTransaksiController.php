@@ -14,8 +14,7 @@ use Illuminate\Support\Facades\Storage;
 
 class PelangganTransaksiController extends Controller
 {
-
-   public function index()
+    public function index()
     {
         $produks = Produk::all();
         $pembayarans = JenisPembayaran::all();
@@ -38,23 +37,59 @@ class PelangganTransaksiController extends Controller
         $request->validate([
             'cart' => 'required|json',
             'jumlah_bayar' => 'required|numeric|min:0',
-            'bukti_bayar' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'bukti_bayar' => 'required|image|mimes:jpeg,png,jpg|max:2048',
             'id_petugas' => 'nullable',
             'id_desainer' => 'nullable'
         ]);
 
-        $metodeTransfer = JenisPembayaran::whereRaw('LOWER(nama_metode) = ?', ['transfer'])->first();
-
-        if (!$metodeTransfer || $request->id_pembayaran != $metodeTransfer->id_jenis_pembayaran) {
-            return back()->with('error', 'Metode pembayaran tidak valid.');
+        $cart = json_decode($request->cart, true);
+        if (empty($cart)) {
+            return back()->withInput()->with('error', 'Keranjang belanja tidak boleh kosong.');
         }
-        $idPembayaran = $metodeTransfer->id_jenis_pembayaran;
+
+        // --- Perhitungan Total Tagihan & Diskon Backend ---
+        $subtotal = 0;
+        $totalQty = 0;
+
+        foreach ($cart as $item) {
+            $produk = Produk::find($item['produk_id']);
+            if (!$produk) continue;
+
+            $hargaSatuan = $produk->harga;
+            if (isset($item['ukuran']) && str_contains($item['ukuran'], 'x')) {
+                $parts = explode('x', $item['ukuran']);
+                $hargaSatuan = $produk->harga * (floatval($parts[0]) * floatval($parts[1]));
+            }
+            
+            $subtotal += ($hargaSatuan * $item['qty']);
+            $totalQty += intval($item['qty']);
+        }
+
+        $diskonPersen = 0;
+        if ($totalQty >= 100) {
+            $diskonPersen = 10;
+        } else if ($totalQty >= 50) {
+            $diskonPersen = 5;
+        }
+
+        $nilaiDiskon = ($subtotal * $diskonPersen) / 100;
+        $totalTagihanAkhir = $subtotal - $nilaiDiskon;
+
+        // VALIDASI TOTAL DP 50% DI BACKEND
+        $minimalDp = $totalTagihanAkhir * 0.50;
+        if ($request->jumlah_bayar < $minimalDp) {
+            return back()
+                ->withInput()
+                ->with('error', 'Gagal memproses pesanan: Nominal transfer kurang dari minimal DP 50% (Rp ' . number_format($minimalDp, 0, ',', '.') . ').');
+        }
+
+        $metodeTransfer = JenisPembayaran::whereRaw('LOWER(nama_metode) = ?', ['transfer'])->first();
+        if (!$metodeTransfer || $request->id_pembayaran != $metodeTransfer->id_jenis_pembayaran) {
+            return back()->withInput()->with('error', 'Metode pembayaran tidak valid.');
+        }
 
         DB::beginTransaction();
         try {
-            $cart = json_decode($request->cart, true);
-            $idPelanggan = Auth::guard('pelanggan')->user()->id_pelanggan;
-
             $hariIni = date('dmy');
             $prefix = 'INV-' . $hariIni . '-';
             $transaksiTerakhir = Transaksi::where('no_invoice', 'like', $prefix . '%')
@@ -63,24 +98,18 @@ class PelangganTransaksiController extends Controller
             $nomorUrutBaru = $transaksiTerakhir ? str_pad((int)substr($transaksiTerakhir->no_invoice, -4) + 1, 4, '0', STR_PAD_LEFT) : '0001';
             $noInvoice = $prefix . $nomorUrutBaru;
 
-            // Hitung Total
-            $totalTagihan = 0;
             $cartData = [];
-
             foreach ($cart as $item) {
                 $produk = Produk::find($item['produk_id']);
                 $hargaSatuan = $produk->harga;
                 
-                // Logika Hitung Custom (PxL)
                 if (isset($item['ukuran']) && str_contains($item['ukuran'], 'x')) {
                     $parts = explode('x', $item['ukuran']);
                     $hargaSatuan = $produk->harga * (floatval($parts[0]) * floatval($parts[1]));
                 }
                 
-                $subtotal = $hargaSatuan * $item['qty'];
-                $totalTagihan += $subtotal;
+                $itemSubtotal = $hargaSatuan * $item['qty'];
 
-                // Simpan File Desain
                 $uploadPath = null;
                 if (!empty($item['file_desain_base64'])) {
                     $uploadPath = $this->saveBase64File($item['file_desain_base64'], $item['file_desain_name']);
@@ -89,7 +118,7 @@ class PelangganTransaksiController extends Controller
                 $cartData[] = [
                     'id_produk' => $produk->id_produk,
                     'qty' => $item['qty'],
-                    'subtotal' => $subtotal,
+                    'subtotal' => $itemSubtotal,
                     'harga_satuan' => $hargaSatuan,
                     'ukuran' => $item['ukuran'],
                     'upload_desain' => $uploadPath,
@@ -103,9 +132,11 @@ class PelangganTransaksiController extends Controller
                 'id_petugas'      => null,
                 'id_desainer'     => null,
                 'id_pembayaran'   => $request->id_pembayaran,
-                'total_tagihan'   => $totalTagihan,
+                'diskon'          => $nilaiDiskon,
+                'total_tagihan'   => $totalTagihanAkhir,
                 'jumlah_bayar'    => $request->jumlah_bayar,
                 'status_pesanan'  => 'Menunggu Konfirmasi',
+                'catatan'         => $request->catatan,
                 'tanggal'         => now(),
                 'bukti_bayar'     => $request->hasFile('bukti_bayar')
                     ? $request->file('bukti_bayar')->store('bukti_pembayaran', 'public')
@@ -130,9 +161,8 @@ class PelangganTransaksiController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error store transaksi pelanggan: ' . $e->getMessage());
-            return back()->with('error', 'Terjadi kesalahan sistem.');
+            return back()->withInput()->with('error', 'Terjadi kesalahan sistem: ' . $e->getMessage());
         }
-        
     }
 
     public function riwayat()
@@ -147,7 +177,6 @@ class PelangganTransaksiController extends Controller
         return view('pelanggan.riwayat', compact('transaksis'));
     }
 
-    // Helper untuk simpan file Base64
     private function saveBase64File($base64, $fileName)
     {
         $decoded = base64_decode($base64);
@@ -156,7 +185,6 @@ class PelangganTransaksiController extends Controller
         return $newFileName;
     }
 
-    // Detail Transaksi
     public function show($id)
     {
         $idPelanggan = Auth::guard('pelanggan')->user()->id_pelanggan;

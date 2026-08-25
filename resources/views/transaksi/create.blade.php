@@ -2,12 +2,26 @@
 @section('title', 'Input Pesanan')
 @section('content')
 <div class="w-full p-2 md:p-4 min-h-screen">
+
+    <!-- ALERT NOTIFIKASI SYSTEM -->
+    @if(session('error'))
+        <div class="mb-4 p-4 bg-red-100 border-l-4 border-red-500 text-red-700 text-sm font-semibold rounded shadow-sm">
+            {{ session('error') }}
+        </div>
+    @endif
+    @if(session('success'))
+        <div class="mb-4 p-4 bg-green-100 border-l-4 border-green-500 text-green-700 text-sm font-semibold rounded shadow-sm">
+            {{ session('success') }}
+        </div>
+    @endif
+
     <form method="POST" action="{{ route('transaksi.store') }}" enctype="multipart/form-data" id="transaksiForm">
         @csrf
         <input type="hidden" name="cart" id="cartInput">
 
         <div class="flex flex-col gap-6 w-full">
 
+            <!-- PANEL INPUT PESANAN -->
             <div class="bg-white border border-gray-300 rounded-lg shadow-sm overflow-hidden w-full">
                 <div class="bg-gray-50 px-5 py-3 border-b border-gray-300">
                     <strong class="text-sm font-semibold text-gray-700 tracking-wider">INPUT PESANAN</strong>
@@ -74,6 +88,7 @@
                 </div>
             </div>
 
+            <!-- PANEL DETAIL TRANSAKSI -->
             <div class="bg-white border border-gray-300 rounded-lg shadow-sm overflow-hidden w-full">
                 <div class="bg-gray-50 px-5 py-3 border-b border-gray-300">
                     <strong class="text-sm font-semibold text-gray-700 tracking-wider">DETAIL TRANSAKSI</strong>
@@ -107,6 +122,7 @@
                 </div>
             </div>
 
+            <!-- PANEL PEMBAYARAN TRANSAKSI -->
             <div class="bg-white border border-gray-300 rounded-lg shadow-sm overflow-hidden w-full">
                 <div class="bg-gray-50 px-5 py-3 border-b border-gray-300">
                     <strong class="text-sm font-semibold text-gray-700 tracking-wider">PEMBAYARAN TRANSAKSI</strong>
@@ -120,7 +136,7 @@
                                     <select name="id_pelanggan" id="pelangganSelect" class="w-full text-sm px-3 py-1.5 bg-white border border-gray-300 rounded text-gray-700 focus:outline-none focus:border-blue-500" required>
                                         <option value="">Pilih Pelanggan</option>
                                         @foreach($pelanggans as $pl)
-                                        <option value="{{ $pl->id_pelanggan }}" data-telpon="{{ $pl->no_telpon ?? '-' }}" data-alamat="{{ $pl->alamat ?? '-' }}">
+                                        <option value="{{ $pl->id_pelanggan }}" data-telpon="{{ $pl->no_telpon ?? '-' }}" data-alamat="{{ $pl->alamat ?? '-' }}" {{ old('id_pelanggan') == $pl->id_pelanggan ? 'selected' : '' }}>
                                             {{ $pl->nama_pelanggan }}
                                         </option>
                                         @endforeach
@@ -142,11 +158,10 @@
                             <div class="grid grid-cols-3 items-center gap-2">
                                 <label class="text-xs font-semibold text-gray-600">Pilih Desainer<span class="text-red-500">*</span></label>
                                 <div class="col-span-2">
-                                    <select name="id_desainer"
-                                        class="w-full text-sm px-3 py-1.5 bg-white border border-gray-300 rounded text-gray-700 focus:outline-none focus:border-blue-500">
+                                    <select name="id_desainer" class="w-full text-sm px-3 py-1.5 bg-white border border-gray-300 rounded text-gray-700 focus:outline-none focus:border-blue-500">
                                         <option value="">-- Pilih Desainer --</option>
                                         @foreach($desainers as $desainer)
-                                            <option value="{{ $desainer->id_petugas }}">
+                                            <option value="{{ $desainer->id_petugas }}" {{ old('id_desainer') == $desainer->id_petugas ? 'selected' : '' }}>
                                                 {{ $desainer->nama_lengkap }}
                                             </option>
                                         @endforeach
@@ -156,7 +171,7 @@
                             <div class="grid grid-cols-3 items-start gap-2">
                                 <label class="text-xs font-semibold text-gray-600 pt-1">Catatan</label>
                                 <div class="col-span-2">
-                                    <textarea name="catatan" rows="3" class="w-full text-sm px-3 py-1.5 bg-white border border-gray-300 rounded text-gray-700 focus:outline-none focus:border-blue-500"></textarea>
+                                    <textarea name="catatan" rows="3" class="w-full text-sm px-3 py-1.5 bg-white border border-gray-300 rounded text-gray-700 focus:outline-none focus:border-blue-500">{{ old('catatan') }}</textarea>
                                 </div>
                             </div>
                         </div>
@@ -165,7 +180,7 @@
                             <div class="grid grid-cols-3 items-center gap-2">
                                 <label class="text-xs font-semibold text-gray-600">Total Tagihan</label>
                                 <div class="col-span-2">
-                                    <input type="text" id="totalTagihanDisplay" class="w-full text-sm px-3 py-1.5 bg-gray-200 border border-gray-300 rounded text-gray-800 font-bold focus:outline-none" readonly>
+                                    <input type="text" id="totalTagihanDisplay" class="w-full text-sm px-3 py-1.5 bg-gray-200 border border-gray-300 rounded text-gray-800 font-bold focus:outline-none" readonly value="Rp 0">
                                 </div>
                             </div>
                             <div class="grid grid-cols-3 items-center gap-2">
@@ -174,27 +189,29 @@
                                     <select name="id_pembayaran" class="w-full text-sm px-3 py-1.5 bg-white border border-gray-300 rounded text-gray-700 focus:outline-none focus:border-blue-500" required>
                                         <option value="">Pilih Jenis Pembayaran</option>
                                         @foreach($pembayarans as $pm)
-                                        <option value="{{ $pm->id_jenis_pembayaran }}">{{ $pm->nama_metode }}</option>
+                                        <option value="{{ $pm->id_jenis_pembayaran }}" {{ old('id_pembayaran') == $pm->id_jenis_pembayaran ? 'selected' : '' }}>{{ $pm->nama_metode }}</option>
                                         @endforeach
                                     </select>
                                 </div>
                             </div>
-                            <div class="grid grid-cols-3 items-center gap-2">
-                                <label class="text-xs font-semibold text-gray-600">Jumlah Bayar<span class="text-red-500">*</span></label>
+                            <div class="grid grid-cols-3 items-start gap-2">
+                                <label class="text-xs font-semibold text-gray-600 pt-1">Jumlah Bayar<span class="text-red-500">*</span></label>
                                 <div class="col-span-2">
-                                    <input type="number" name="jumlah_bayar" id="jumlahBayarInput" class="w-full text-sm px-3 py-1.5 bg-white border border-gray-300 rounded text-gray-700 focus:outline-none focus:border-blue-500" step="0.01" required>
+                                    <input type="number" name="jumlah_bayar" id="jumlahBayarInput" class="w-full text-sm px-3 py-1.5 bg-white border border-gray-300 rounded text-gray-700 focus:outline-none focus:border-blue-500" step="0.01" required value="{{ old('jumlah_bayar') }}" placeholder="0">
+                                    <!-- Indikator Dinamis Minimal DP -->
+                                    <small id="hintMinimalDp" class="text-[11px] text-red-600 font-bold mt-1 block">Minimal DP 50%: Rp 0</small>
                                 </div>
                             </div>
                             <div class="grid grid-cols-3 items-center gap-2">
                                 <label class="text-xs font-semibold text-gray-600">Diskon</label>
                                 <div class="col-span-2">
-                                    <input type="number" name="diskon" id="diskonInput" class="w-full text-sm px-3 py-1.5 bg-white border border-gray-300 rounded text-gray-700 focus:outline-none focus:border-blue-500" value="0" min="0">
+                                    <input type="number" name="diskon" id="diskonInput" class="w-full text-sm px-3 py-1.5 bg-white border border-gray-300 rounded text-gray-700 focus:outline-none focus:border-blue-500" value="{{ old('diskon', 0) }}" min="0">
                                 </div>
                             </div>
                             <div class="grid grid-cols-3 items-center gap-2">
                                 <label class="text-xs font-semibold text-gray-600">Tanggal</label>
                                 <div class="col-span-2">
-                                    <input type="date" name="tanggal" class="w-full text-sm px-3 py-1.5 bg-white border border-gray-300 rounded text-gray-700 focus:outline-none focus:border-blue-500" value="{{ date('Y-m-d') }}">
+                                    <input type="date" name="tanggal" class="w-full text-sm px-3 py-1.5 bg-white border border-gray-300 rounded text-gray-700 focus:outline-none focus:border-blue-500" value="{{ old('tanggal', date('Y-m-d')) }}">
                                 </div>
                             </div>
                             <div class="grid grid-cols-3 items-center gap-2">
@@ -229,6 +246,8 @@
     // Global State
     let cart = [];
     let subtotal = 0;
+    let totalTagihanAkhir = 0;
+    let minimalDp = 0;
     let currentFile = null;
     let currentFileName = '';
     let currentProduk = null;
@@ -242,14 +261,12 @@
         buttonsStyling: false
     });
 
-    // Validasi format ukuran custom (PxL atau x)
     function isCustomSize(ukuran) {
         if (!ukuran) return false;
         let ukuranLower = ukuran.toLowerCase();
         return ukuranLower.includes('x') || ukuranLower.includes('pxl');
     }
 
-    // Reset Form Input Item ke Default
     function resetInputForm() {
         document.getElementById('produkSelect').value = '';
         if (document.getElementById('panjangInput')) document.getElementById('panjangInput').value = '';
@@ -270,7 +287,6 @@
         resetInputForm();
     };
 
-    // Toggle view input ukuran berdasarkan produk terpilih
     function updateUkuranForm() {
         let select = document.getElementById('produkSelect');
         let selectedOption = select.options[select.selectedIndex];
@@ -287,44 +303,35 @@
             harga_dasar: parseFloat(selectedOption.dataset.harga)
         };
 
-        // Tampilkan/Sembunyikan div ukuran
         document.getElementById('ukuranEmpty').style.display = 'none';
         
         if (isCustomSize(currentProduk.ukuran_default)) {
             document.getElementById('ukuranCustom').style.display = 'block';
             document.getElementById('ukuranFixed').style.display = 'none';
-            // Hitung harga awal jika user belum input panjang/lebar
             document.getElementById('hargaDisplay').value = 'Rp ' + currentProduk.harga_dasar.toLocaleString('id-ID');
         } else {
             document.getElementById('ukuranFixed').style.display = 'block';
             document.getElementById('ukuranCustom').style.display = 'none';
             document.getElementById('ukuranFixedValue').value = currentProduk.ukuran_default;
-            // Tampilkan harga dasar
             document.getElementById('hargaDisplay').value = 'Rp ' + currentProduk.harga_dasar.toLocaleString('id-ID');
         }
     }
 
-    
-    // Kalkulasi harga per unit (Rumus: Harga x P x L)
     function hitungHargaCustom() {
         if (!currentProduk) return;
         let panjang = parseFloat(document.getElementById('panjangInput').value) || 0;
         let lebar = parseFloat(document.getElementById('lebarInput').value) || 0;
         
-        // Jika tidak input panjang lebar, gunakan harga dasar
         let totalHarga = (panjang > 0 && lebar > 0) ? (currentProduk.harga_dasar * panjang * lebar) : currentProduk.harga_dasar;
-        
         document.getElementById('hargaDisplay').value = 'Rp ' + totalHarga.toLocaleString('id-ID');
     }
 
-    // Event listeners untuk form input produk & ukuran
     document.getElementById('produkSelect').addEventListener('change', updateUkuranForm);
     if (document.getElementById('panjangInput')) {
         document.getElementById('panjangInput').addEventListener('input', hitungHargaCustom);
         document.getElementById('lebarInput').addEventListener('input', hitungHargaCustom);
     }
     
-    // Handler input file cetakan/desain
     document.getElementById('desainInput').onchange = (e) => {
         if (e.target.files.length) {
             currentFile = e.target.files[0];
@@ -337,7 +344,6 @@
         }
     };
     
-    // Autofill detail data pelanggan saat di-select
     document.getElementById('pelangganSelect').onchange = function() {
         let selectedOption = this.options[this.selectedIndex];
         let telpon = selectedOption.getAttribute('data-telpon') || '-';
@@ -347,7 +353,6 @@
         document.getElementById('alamatPelanggan').value = alamat;
     };
     
-    // Tambah item ke dalam array temporary (Cart)
     document.getElementById('tambahItemBtn').onclick = async function() {
         if (!currentProduk) {
             alert('Pilih produk terlebih dahulu');
@@ -377,7 +382,6 @@
         
         let qty = parseInt(document.getElementById('qtyInput').value) || 1;
         
-        // Konversi file attachment ke format Base64 string
         let fileBase64 = null;
         if (currentFile) {
             fileBase64 = await new Promise((resolve) => {
@@ -402,7 +406,6 @@
         resetInputForm();
     };
     
-    // Render elemen HTML tabel keranjang & re-kalkulasi subtotal
     function updateCartDisplay() {
         let html = '';
         let total = 0;
@@ -453,7 +456,6 @@
         hitungTotalTagihan();
     }
     
-    // Update kuantitas item langsung dari tabel keranjang
     window.updateQty = function(idx, val) {
         let qty = parseInt(val);
         if (!isNaN(qty) && qty > 0) {
@@ -462,7 +464,6 @@
         }
     };
     
-    // Hapus baris item tertentu dari keranjang dengan alert
     window.hapusItem = function(idx, nama) {
         swalWithBootstrapButtons.fire({
             title: "Apakah Anda yakin?",
@@ -488,13 +489,22 @@
         });
     };
     
-    // Hitung akhir nominal tagihan setelah dikurangi nilai diskon keuangan
     function hitungTotalTagihan() {
         let diskon = parseInt(document.getElementById('diskonInput').value) || 0;
-        let totalTagihan = subtotal - diskon;
-        if (totalTagihan < 0) totalTagihan = 0;
-        document.getElementById('totalTagihanDisplay').value = 'Rp ' + totalTagihan.toLocaleString('id-ID');
+        totalTagihanAkhir = subtotal - diskon;
+        if (totalTagihanAkhir < 0) totalTagihanAkhir = 0;
+
+        minimalDp = totalTagihanAkhir * 0.50; // Perhitungan 50% Minimal DP
+
+        document.getElementById('totalTagihanDisplay').value = 'Rp ' + totalTagihanAkhir.toLocaleString('id-ID');
         
+        let inputBayar = document.getElementById('jumlahBayarInput');
+        if (inputBayar) {
+            inputBayar.min = minimalDp;
+        }
+
+        document.getElementById('hintMinimalDp').innerText = 'Minimal DP 50%: Rp ' + minimalDp.toLocaleString('id-ID');
+
         let hiddenTotal = document.querySelector('input[name="total_tagihan"]');
         if (!hiddenTotal) {
             hiddenTotal = document.createElement('input');
@@ -502,28 +512,59 @@
             hiddenTotal.name = 'total_tagihan';
             document.getElementById('transaksiForm').appendChild(hiddenTotal);
         }
-        hiddenTotal.value = totalTagihan;
+        hiddenTotal.value = totalTagihanAkhir;
     }
     
     document.getElementById('diskonInput').addEventListener('input', hitungTotalTagihan);
     
-    // Intercept submit form: Parsing data state array JS ke string JSON format sebelum di-post ke PHP
-    document.getElementById('transaksiForm').addEventListener('submit', function(e) {
-        if (cart.length === 0) {
-            e.preventDefault();
-            alert('Minimal satu produk ditambahkan');
-            return;
-        }
-        
-        document.getElementById('cartInput').value = JSON.stringify(cart.map(item => ({
-            produk_id: item.produk_id,
-            qty: item.qty,
-            ukuran: item.ukuran,
-            
-            file_desain_base64: item.file_base64,
-            file_desain_name: item.file_name,
-            file_desain_type: item.file_type
-        })));
+    // VALIDASI PEMBATALAN SUBMIT APABILA NOMINAL BAYAR < 50%
+    document.addEventListener('DOMContentLoaded', function() {
+        const formTransaksi = document.getElementById('transaksiForm');
+
+        formTransaksi.addEventListener('submit', function(e) {
+            // 1. Cek Keranjang Kosong
+            if (cart.length === 0) {
+                e.preventDefault();
+                e.stopPropagation();
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Keranjang Belanja Kosong!',
+                    text: 'Silakan tambahkan minimal satu produk sebelum memproses transaksi.',
+                    confirmButtonColor: '#2563eb'
+                });
+                return false;
+            }
+
+            // 2. Cek Nominal Bayar < Minimal DP 50%
+            let inputBayar = document.getElementById('jumlahBayarInput');
+            let nominalBayar = parseFloat(inputBayar.value) || 0;
+
+            if (nominalBayar < minimalDp) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Nominal Transfer Kurang!',
+                    html: `Nominal bayar yang Anda masukkan <b>Rp ${nominalBayar.toLocaleString('id-ID')}</b>.<br>` +
+                          `Syarat minimal pembayaran DP (50%) adalah <b>Rp ${minimalDp.toLocaleString('id-ID')}</b>.`,
+                    confirmButtonColor: '#dc2626'
+                });
+
+                inputBayar.focus();
+                return false;
+            }
+
+            // Bind Array Cart ke Input Hidden sebelum dikirim
+            document.getElementById('cartInput').value = JSON.stringify(cart.map(item => ({
+                produk_id: item.produk_id,
+                qty: item.qty,
+                ukuran: item.ukuran,
+                file_desain_base64: item.file_base64,
+                file_desain_name: item.file_name,
+                file_desain_type: item.file_type
+            })));
+        });
     });
 </script>
 @endsection
