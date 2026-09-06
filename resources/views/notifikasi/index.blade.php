@@ -42,7 +42,7 @@
                 <tr class="hover:bg-gray-50 align-top">
                     <td class="border p-2 text-center">{{ $index + 1 }}</td>
                     <td class="border p-2 font-medium whitespace-nowrap">{{ $p->no_invoice }}</td>
-                    <td class="border p-2">{{ $p->pelanggan->nama_pelanggan ?? '-' }}</td>
+                    <td class="border p-2">{{ $p->pelanggan->nama_lengkap ?? $p->pelanggan->username ?? '-' }}</td>
                     
                     <!-- Kolom Rincian Produk -->
                     <td class="border p-2">
@@ -145,16 +145,32 @@
 
         if (actionType === 'terima') {
             if (!selectDesainer.value) {
-                alert('Silakan pilih desainer terlebih dahulu!');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Perhatian',
+                    text: 'Silakan pilih desainer terlebih dahulu!',
+                    confirmButtonText: 'OK'
+                });
                 selectDesainer.focus();
                 return;
             }
             form.submit();
         } else if (actionType === 'tolak') {
-            if (confirm('Apakah Anda yakin ingin MENOLAK pesanan ini?')) {
-                selectDesainer.removeAttribute('required'); // Lepas validasi required desainer
-                form.submit();
-            }
+            Swal.fire({
+                title: "Apakah Anda yakin?",
+                text: "Pesanan ini akan ditolak dan dicatat dalam sistem.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#3085d6",
+                confirmButtonText: "Ya, Tolak!",
+                cancelButtonText: "Batal"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    selectDesainer.removeAttribute('required'); // Lepas validasi required desainer
+                    form.submit();
+                }
+            });
         }
     }
 </script>

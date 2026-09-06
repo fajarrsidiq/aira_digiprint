@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
-   public function petugas()
+    public function petugas()
     {
         $user = Auth::guard('petugas')->user();
         
@@ -25,15 +25,21 @@ class DashboardController extends Controller
         ];
 
         if (in_array($user->level, ['Owner', 'Administrasi'])) {
-            $data['totalPelanggan'] = Pelanggan::count();
-            $data['totalPetugas']   = Petugas::count();
-            $data['totalTransaksi'] = Transaksi::where('status_pesanan', '!=', 'Ditolak')->count();
+            $data['totalPelanggan']  = Pelanggan::count();
+            $data['totalPetugas']    = Petugas::count();
+            $data['totalTransaksi']  = Transaksi::where('status_pesanan', '!=', 'Ditolak')->count();
             $data['totalPendapatan'] = Transaksi::where('status_pesanan', '!=', 'Ditolak')->sum('total_tagihan');
-            $data['totalDiterima'] = Transaksi::where('status_pesanan', '!=', 'Ditolak')->sum('jumlah_bayar');
-            $data['totalPiutang']    = $data['totalPendapatan'] - $data['totalDiterima'];
-            $data['totalProduk']  = Produk::count();
-            $data['totalBahan']   = Bahan::count();
-            $data['totalSatuan']  = Satuan::count();
+            $data['totalDiterima']   = Transaksi::where('status_pesanan', '!=', 'Ditolak')->sum('jumlah_bayar');
+            
+            // Perbaikan Total Piutang: Hanya menjumlahkan kekurangan dari transaksi yang kurang bayar
+            $data['totalPiutang']    = Transaksi::where('status_pesanan', '!=', 'Ditolak')
+                ->whereColumn('total_tagihan', '>', 'jumlah_bayar')
+                ->selectRaw('SUM(total_tagihan - jumlah_bayar) as total')
+                ->value('total') ?? 0;
+
+            $data['totalProduk']     = Produk::count();
+            $data['totalBahan']      = Bahan::count();
+            $data['totalSatuan']     = Satuan::count();
             
             // Ambil data chart hanya untuk level berwenang
             $data['chartData'] = Transaksi::select(

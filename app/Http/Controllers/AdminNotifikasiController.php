@@ -39,7 +39,10 @@ class AdminNotifikasiController extends Controller
             }
 
             elseif ($request->action == 'tolak') {
-                $transaksi->update(['status_pesanan' => 'Ditolak']);
+                $transaksi->update([
+                    'status_pesanan' => 'Ditolak',
+                    'id_petugas'     => Auth::guard('petugas')->id(),
+                ]);
                 return back()->with('success', 'Pesanan ditolak.');
             }
 

@@ -37,9 +37,9 @@
                             Lihat Invoice
                             </a>
                         @elseif($t->status_pesanan == 'Ditolak')
-                            <span class="text-xs text-red-500 font-bold">Ditolak</span>
+                            <span class="text-xs text-red-500 font-bold">Pesanan Ditolak</span>
                         @else
-                            <span class="text-xs text-gray-400 italic">Menunggu...</span>
+                            <span class="text-xs text-gray-400 italic">Menunggu Konfirmasi...</span>
                         @endif
                     </td>
                 </tr>
